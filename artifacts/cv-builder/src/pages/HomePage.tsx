@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { exportToPDF } from "@/utils/pdfExport";
 import {
   User, GraduationCap, Briefcase, Zap, ChevronRight, ChevronLeft,
-  Download, Eye, EyeOff, FileText
+  Download, Eye, EyeOff
 } from "lucide-react";
 
 const STEPS = [
@@ -57,15 +57,6 @@ export default function HomePage() {
       <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <FileText className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-sm font-bold text-foreground leading-tight">سيرتك الذكية</h1>
-              <p className="text-[10px] text-muted-foreground leading-tight">احترافي ومجاني</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -87,6 +78,8 @@ export default function HomePage() {
               {exporting ? "جارٍ التصدير..." : "تحميل PDF"}
             </Button>
           </div>
+          <h1 className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-foreground">سيرتك الذكية</h1>
+          <div />
         </div>
       </header>
 
