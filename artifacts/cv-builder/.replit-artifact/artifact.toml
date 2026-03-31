@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "CV Builder - منشئ السيرة الذاتية"
+title = "سيرتك الذكية"
 version = "1.0.0"
 id = "artifacts/cv-builder"
 router = "path"

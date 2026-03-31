@@ -61,7 +61,7 @@ export default function HomePage() {
               <FileText className="w-4 h-4 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-foreground leading-tight">منشئ السيرة الذاتية</h1>
+              <h1 className="text-sm font-bold text-foreground leading-tight">سيرتك الذكية</h1>
               <p className="text-[10px] text-muted-foreground leading-tight">احترافي ومجاني</p>
             </div>
           </div>
