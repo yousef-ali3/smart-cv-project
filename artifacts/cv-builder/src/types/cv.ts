@@ -7,7 +7,6 @@ export interface PersonalInfo {
   website: string;
   linkedin: string;
   summary: string;
-  photo: string;
 }
 
 export interface Education {
@@ -35,7 +34,6 @@ export interface Experience {
 export interface Skill {
   id: string;
   name: string;
-  level: "مبتدئ" | "متوسط" | "متقدم" | "خبير";
 }
 
 export interface Course {
@@ -71,7 +69,6 @@ export const defaultCVData: CVData = {
     website: "",
     linkedin: "",
     summary: "",
-    photo: "",
   },
   education: [],
   experience: [],

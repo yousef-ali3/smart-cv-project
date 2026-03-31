@@ -3,22 +3,12 @@ import { Mail, Phone, MapPin, Globe, Linkedin } from "lucide-react";
 
 function Section({ title }: { title: string }) {
   return (
-    <div className="flex items-center gap-3 mb-3 mt-5 first:mt-0">
-      <h2 className="text-[11px] font-bold uppercase tracking-widest text-black">{title}</h2>
+    <div className="flex items-center gap-3 mb-3 mt-5">
+      <h2 className="text-[11px] font-bold uppercase tracking-widest text-black whitespace-nowrap">{title}</h2>
       <div className="flex-1 h-[1.5px] bg-black/20" />
     </div>
   );
 }
-
-const skillLevelWidth = (level: string) => {
-  switch (level) {
-    case "مبتدئ": return "25%";
-    case "متوسط": return "50%";
-    case "متقدم": return "75%";
-    case "خبير": return "100%";
-    default: return "50%";
-  }
-};
 
 export default function CVPreview() {
   const { cvData } = useCVContext();
@@ -43,49 +33,41 @@ export default function CVPreview() {
   return (
     <div
       id="cv-preview"
-      className="bg-white text-[#1a1a1a] font-sans w-full"
+      className="bg-white text-[#1a1a1a] w-full"
       style={{ fontFamily: "'Segoe UI', 'Noto Sans Arabic', Arial, sans-serif", direction: "rtl", minHeight: "297mm", padding: "12mm 14mm" }}
     >
-      <div className="flex gap-4 items-start mb-4">
-        {personalInfo.photo && (
-          <img
-            src={personalInfo.photo}
-            alt="صورة شخصية"
-            className="w-20 h-20 rounded-full object-cover border-2 border-black/20 shrink-0"
-          />
+      {/* Header */}
+      <div className="text-center border-b-2 border-black/80 pb-4 mb-1">
+        <h1 className="text-[22px] font-black text-black leading-tight">{personalInfo.fullName}</h1>
+        {personalInfo.jobTitle && (
+          <p className="text-[11px] font-semibold text-gray-600 mt-1">{personalInfo.jobTitle}</p>
         )}
-        <div className="flex-1">
-          <h1 className="text-2xl font-black text-black leading-tight">{personalInfo.fullName}</h1>
-          {personalInfo.jobTitle && (
-            <p className="text-sm font-semibold text-gray-600 mt-0.5">{personalInfo.jobTitle}</p>
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2">
+          {personalInfo.email && (
+            <span className="flex items-center gap-1 text-[9.5px] text-gray-600">
+              <Mail className="w-2.5 h-2.5" />{personalInfo.email}
+            </span>
           )}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-            {personalInfo.email && (
-              <span className="flex items-center gap-1 text-[10px] text-gray-600">
-                <Mail className="w-3 h-3" />{personalInfo.email}
-              </span>
-            )}
-            {personalInfo.phone && (
-              <span className="flex items-center gap-1 text-[10px] text-gray-600">
-                <Phone className="w-3 h-3" />{personalInfo.phone}
-              </span>
-            )}
-            {personalInfo.location && (
-              <span className="flex items-center gap-1 text-[10px] text-gray-600">
-                <MapPin className="w-3 h-3" />{personalInfo.location}
-              </span>
-            )}
-            {personalInfo.linkedin && (
-              <span className="flex items-center gap-1 text-[10px] text-gray-600">
-                <Linkedin className="w-3 h-3" />{personalInfo.linkedin}
-              </span>
-            )}
-            {personalInfo.website && (
-              <span className="flex items-center gap-1 text-[10px] text-gray-600">
-                <Globe className="w-3 h-3" />{personalInfo.website}
-              </span>
-            )}
-          </div>
+          {personalInfo.phone && (
+            <span className="flex items-center gap-1 text-[9.5px] text-gray-600">
+              <Phone className="w-2.5 h-2.5" />{personalInfo.phone}
+            </span>
+          )}
+          {personalInfo.location && (
+            <span className="flex items-center gap-1 text-[9.5px] text-gray-600">
+              <MapPin className="w-2.5 h-2.5" />{personalInfo.location}
+            </span>
+          )}
+          {personalInfo.linkedin && (
+            <span className="flex items-center gap-1 text-[9.5px] text-gray-600">
+              <Linkedin className="w-2.5 h-2.5" />{personalInfo.linkedin}
+            </span>
+          )}
+          {personalInfo.website && (
+            <span className="flex items-center gap-1 text-[9.5px] text-gray-600">
+              <Globe className="w-2.5 h-2.5" />{personalInfo.website}
+            </span>
+          )}
         </div>
       </div>
 
@@ -145,20 +127,11 @@ export default function CVPreview() {
       {skills.length > 0 && (
         <>
           <Section title="المهارات" />
-          <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+          <div className="flex flex-wrap gap-2">
             {skills.map((skill) => (
-              <div key={skill.id}>
-                <div className="flex justify-between mb-0.5">
-                  <span className="text-[10px] font-medium">{skill.name}</span>
-                  <span className="text-[9px] text-gray-500">{skill.level}</span>
-                </div>
-                <div className="h-1 bg-gray-200 rounded-full">
-                  <div
-                    className="h-full bg-black rounded-full"
-                    style={{ width: skillLevelWidth(skill.level) }}
-                  />
-                </div>
-              </div>
+              <span key={skill.id} className="text-[10px] bg-gray-100 border border-gray-200 px-2.5 py-0.5 rounded font-medium">
+                {skill.name}
+              </span>
             ))}
           </div>
         </>
@@ -171,7 +144,7 @@ export default function CVPreview() {
             {languages.map((lang) => (
               <div key={lang.id} className="flex items-center gap-1.5">
                 <span className="text-[10.5px] font-semibold">{lang.name}</span>
-                <span className="text-[9px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{lang.level}</span>
+                {lang.level && <span className="text-[9px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{lang.level}</span>}
               </div>
             ))}
           </div>

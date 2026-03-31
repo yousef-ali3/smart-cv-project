@@ -43,14 +43,16 @@ export default function HomePage() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  const handleExportPDF = useCallback(async () => {
+  const { cvData } = useCVContext();
+
+  const handleExportPDF = useCallback(() => {
     setExporting(true);
     try {
-      await exportToPDF("cv-preview", "سيرتي-الذاتية.pdf");
+      exportToPDF(cvData);
     } finally {
       setExporting(false);
     }
-  }, []);
+  }, [cvData]);
 
   const handlePrint = () => {
     window.print();

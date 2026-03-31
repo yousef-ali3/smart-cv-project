@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useCVContext } from "@/context/CVContext";
-import { Skill, Language, Course } from "@/types/cv";
+import { Language, Course } from "@/types/cv";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Zap, Globe, BookOpen } from "lucide-react";
 
@@ -12,30 +11,18 @@ function generateId() {
   return Math.random().toString(36).substring(2, 10);
 }
 
-const skillLevels: Skill["level"][] = ["مبتدئ", "متوسط", "متقدم", "خبير"];
 const languageLevels: Language["level"][] = ["مبتدئ", "متوسط", "جيد", "ممتاز", "اللغة الأم"];
-
-const skillLevelColor = (level: Skill["level"]) => {
-  switch (level) {
-    case "مبتدئ": return "bg-slate-100 text-slate-700";
-    case "متوسط": return "bg-blue-100 text-blue-700";
-    case "متقدم": return "bg-green-100 text-green-700";
-    case "خبير": return "bg-purple-100 text-purple-700";
-    default: return "bg-muted text-muted-foreground";
-  }
-};
 
 export default function SkillsStep() {
   const { cvData, updateCVData } = useCVContext();
   const [newSkill, setNewSkill] = useState("");
-  const [newSkillLevel, setNewSkillLevel] = useState<Skill["level"]>("متوسط");
   const [newLang, setNewLang] = useState("");
   const [newLangLevel, setNewLangLevel] = useState<Language["level"]>("جيد");
 
   const addSkill = () => {
     if (!newSkill.trim()) return;
     updateCVData({
-      skills: [...cvData.skills, { id: generateId(), name: newSkill.trim(), level: newSkillLevel }],
+      skills: [...cvData.skills, { id: generateId(), name: newSkill.trim() }],
     });
     setNewSkill("");
   };
@@ -78,6 +65,7 @@ export default function SkillsStep() {
         <p className="text-sm text-muted-foreground">أضف مهاراتك، لغاتك، والدورات التدريبية</p>
       </div>
 
+      {/* Skills */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -88,10 +76,17 @@ export default function SkillsStep() {
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
             {cvData.skills.map((skill) => (
-              <div key={skill.id} className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${skillLevelColor(skill.level)}`} data-testid={`badge-skill-${skill.id}`}>
+              <div
+                key={skill.id}
+                className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-muted text-foreground border border-border"
+                data-testid={`badge-skill-${skill.id}`}
+              >
                 <span>{skill.name}</span>
-                <span className="opacity-60">· {skill.level}</span>
-                <button onClick={() => deleteSkill(skill.id)} className="ml-1 opacity-60 hover:opacity-100" data-testid={`button-delete-skill-${skill.id}`}>
+                <button
+                  onClick={() => deleteSkill(skill.id)}
+                  className="mr-1 opacity-50 hover:opacity-100 transition-opacity"
+                  data-testid={`button-delete-skill-${skill.id}`}
+                >
                   ×
                 </button>
               </div>
@@ -99,21 +94,13 @@ export default function SkillsStep() {
           </div>
           <div className="flex gap-2">
             <Input
-              placeholder="اسم المهارة (مثال: Python، Excel، ...)"
+              placeholder="اسم المهارة (مثال: Python، Excel، تحليل البيانات...)"
               value={newSkill}
               onChange={(e) => setNewSkill(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addSkill()}
               className="flex-1"
               data-testid="input-new-skill"
             />
-            <select
-              value={newSkillLevel}
-              onChange={(e) => setNewSkillLevel(e.target.value as Skill["level"])}
-              className="border border-input rounded-md px-2 py-1 text-sm bg-background"
-              data-testid="select-skill-level"
-            >
-              {skillLevels.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
             <Button onClick={addSkill} size="sm" data-testid="button-add-skill">
               <Plus className="w-4 h-4" />
             </Button>
@@ -121,6 +108,7 @@ export default function SkillsStep() {
         </CardContent>
       </Card>
 
+      {/* Languages */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -131,10 +119,18 @@ export default function SkillsStep() {
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
             {cvData.languages.map((lang) => (
-              <div key={lang.id} className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-accent text-accent-foreground" data-testid={`badge-lang-${lang.id}`}>
+              <div
+                key={lang.id}
+                className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-muted text-foreground border border-border"
+                data-testid={`badge-lang-${lang.id}`}
+              >
                 <span>{lang.name}</span>
                 <span className="opacity-60">· {lang.level}</span>
-                <button onClick={() => deleteLanguage(lang.id)} className="ml-1 opacity-60 hover:opacity-100" data-testid={`button-delete-lang-${lang.id}`}>
+                <button
+                  onClick={() => deleteLanguage(lang.id)}
+                  className="mr-1 opacity-50 hover:opacity-100 transition-opacity"
+                  data-testid={`button-delete-lang-${lang.id}`}
+                >
                   ×
                 </button>
               </div>
@@ -164,6 +160,7 @@ export default function SkillsStep() {
         </CardContent>
       </Card>
 
+      {/* Courses */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -172,7 +169,7 @@ export default function SkillsStep() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {cvData.courses.map((course, i) => (
+          {cvData.courses.map((course) => (
             <div key={course.id} className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-lg border border-border" data-testid={`card-course-${course.id}`}>
               <div className="space-y-1">
                 <Label className="text-xs">اسم الدورة / الشهادة</Label>
