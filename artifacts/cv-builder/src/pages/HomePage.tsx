@@ -75,17 +75,37 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Mobile toggle */}
-        <div className="flex justify-end mb-3 md:hidden">
+        {/* Action bar — preview toggle + PDF + print */}
+        <div className="flex justify-end gap-2 mb-4">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowPreview(!showPreview)}
-            className="text-xs"
+            className="text-xs md:hidden"
             data-testid="button-toggle-preview"
           >
             {showPreview ? <EyeOff className="w-3.5 h-3.5 ml-1" /> : <Eye className="w-3.5 h-3.5 ml-1" />}
             {showPreview ? "إخفاء المعاينة" : "عرض المعاينة"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrint}
+            className="text-xs"
+            data-testid="button-print"
+          >
+            <Printer className="w-3.5 h-3.5 ml-1" />
+            طباعة
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleExportPDF}
+            disabled={exporting}
+            className="text-xs"
+            data-testid="button-export-pdf"
+          >
+            <Download className="w-3.5 h-3.5 ml-1" />
+            {exporting ? "جارٍ التصدير..." : "تحميل PDF"}
           </Button>
         </div>
 
@@ -132,29 +152,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* PDF & Print buttons at the bottom */}
-            <div className="mt-6 flex gap-3 justify-center border-t border-border pt-5">
-              <Button
-                size="lg"
-                onClick={handleExportPDF}
-                disabled={exporting}
-                className="flex items-center gap-2 px-8"
-                data-testid="button-export-pdf"
-              >
-                <Download className="w-4 h-4" />
-                {exporting ? "جارٍ التصدير..." : "تحميل PDF"}
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={handlePrint}
-                className="flex items-center gap-2 px-8"
-                data-testid="button-print"
-              >
-                <Printer className="w-4 h-4" />
-                طباعة
-              </Button>
-            </div>
           </div>
 
           {/* Preview side */}
