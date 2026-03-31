@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { exportToPDF } from "@/utils/pdfExport";
 import {
   User, GraduationCap, Briefcase, Zap, ChevronRight, ChevronLeft,
-  Download, Eye, EyeOff
+  Download, Eye, EyeOff, Printer
 } from "lucide-react";
 
 const STEPS = [
@@ -46,44 +46,27 @@ export default function HomePage() {
   const handleExportPDF = useCallback(async () => {
     setExporting(true);
     try {
-      await exportToPDF("cv-preview", "my-cv.pdf");
+      await exportToPDF("cv-preview", "سيرتي-الذاتية.pdf");
     } finally {
       setExporting(false);
     }
   }, []);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPreview(!showPreview)}
-              className="text-xs md:hidden"
-              data-testid="button-toggle-preview"
-            >
-              {showPreview ? <EyeOff className="w-3.5 h-3.5 ml-1" /> : <Eye className="w-3.5 h-3.5 ml-1" />}
-              {showPreview ? "إخفاء" : "معاينة"}
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleExportPDF}
-              disabled={exporting}
-              className="text-xs"
-              data-testid="button-export-pdf"
-            >
-              <Download className="w-3.5 h-3.5 ml-1" />
-              {exporting ? "جارٍ التصدير..." : "تحميل PDF"}
-            </Button>
-          </div>
-          <h1 className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-foreground">سيرتك الذكية</h1>
-          <div />
+      {/* Header — name only, centered */}
+      <header className="border-b border-border bg-background sticky top-0 z-50">
+        <div className="py-4 text-center">
+          <h1 className="text-3xl font-black tracking-tight text-foreground">سيرتك الذكية</h1>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Stepper */}
         <div className="mb-6 max-w-2xl mx-auto lg:mx-0">
           <Stepper
             steps={STEPS}
@@ -92,12 +75,28 @@ export default function HomePage() {
           />
         </div>
 
+        {/* Mobile toggle */}
+        <div className="flex justify-end mb-3 md:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPreview(!showPreview)}
+            className="text-xs"
+            data-testid="button-toggle-preview"
+          >
+            {showPreview ? <EyeOff className="w-3.5 h-3.5 ml-1" /> : <Eye className="w-3.5 h-3.5 ml-1" />}
+            {showPreview ? "إخفاء المعاينة" : "عرض المعاينة"}
+          </Button>
+        </div>
+
         <div className="flex gap-6">
+          {/* Form side */}
           <div className={`flex-1 min-w-0 ${showPreview ? "hidden md:block" : "block"}`}>
             <div className="bg-card border border-border rounded-xl shadow-sm p-6 min-h-[500px]">
               {renderStep(currentStep)}
             </div>
 
+            {/* Navigation buttons */}
             <div className="flex items-center justify-between mt-4">
               <Button
                 variant="outline"
@@ -123,33 +122,46 @@ export default function HomePage() {
                 </Button>
               ) : (
                 <Button
-                  onClick={handleExportPDF}
-                  disabled={exporting}
+                  onClick={handleNext}
                   className="flex items-center gap-2"
-                  data-testid="button-finish-export"
+                  data-testid="button-next-step-last"
                 >
-                  <Download className="w-4 h-4" />
-                  {exporting ? "جارٍ التصدير..." : "تحميل PDF"}
+                  التالي
+                  <ChevronLeft className="w-4 h-4" />
                 </Button>
               )}
             </div>
+
+            {/* PDF & Print buttons at the bottom */}
+            <div className="mt-6 flex gap-3 justify-center border-t border-border pt-5">
+              <Button
+                size="lg"
+                onClick={handleExportPDF}
+                disabled={exporting}
+                className="flex items-center gap-2 px-8"
+                data-testid="button-export-pdf"
+              >
+                <Download className="w-4 h-4" />
+                {exporting ? "جارٍ التصدير..." : "تحميل PDF"}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handlePrint}
+                className="flex items-center gap-2 px-8"
+                data-testid="button-print"
+              >
+                <Printer className="w-4 h-4" />
+                طباعة
+              </Button>
+            </div>
           </div>
 
+          {/* Preview side */}
           <div className={`w-[420px] shrink-0 ${showPreview ? "block" : "hidden md:block"}`}>
             <div className="sticky top-20">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">معاينة مباشرة</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExportPDF}
-                  disabled={exporting}
-                  className="text-xs"
-                  data-testid="button-export-pdf-preview"
-                >
-                  <Download className="w-3 h-3 ml-1" />
-                  PDF
-                </Button>
               </div>
               <div className="bg-gray-100 rounded-xl border border-border overflow-hidden shadow-lg">
                 <div className="overflow-y-auto max-h-[calc(100vh-160px)]">
