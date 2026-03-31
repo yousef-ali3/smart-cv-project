@@ -4,8 +4,8 @@ import { Mail, Phone, MapPin, Globe, Linkedin } from "lucide-react";
 function Section({ title }: { title: string }) {
   return (
     <div className="flex items-center gap-3 mb-3 mt-5 first:mt-0">
-      <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#1a3c6e]">{title}</h2>
-      <div className="flex-1 h-[1.5px] bg-[#1a3c6e]/20" />
+      <h2 className="text-[11px] font-bold uppercase tracking-widest text-black">{title}</h2>
+      <div className="flex-1 h-[1.5px] bg-black/20" />
     </div>
   );
 }
@@ -51,13 +51,13 @@ export default function CVPreview() {
           <img
             src={personalInfo.photo}
             alt="صورة شخصية"
-            className="w-20 h-20 rounded-full object-cover border-2 border-[#1a3c6e]/20 shrink-0"
+            className="w-20 h-20 rounded-full object-cover border-2 border-black/20 shrink-0"
           />
         )}
         <div className="flex-1">
-          <h1 className="text-2xl font-black text-[#1a3c6e] leading-tight">{personalInfo.fullName}</h1>
+          <h1 className="text-2xl font-black text-black leading-tight">{personalInfo.fullName}</h1>
           {personalInfo.jobTitle && (
-            <p className="text-sm font-semibold text-[#4a7fb5] mt-0.5">{personalInfo.jobTitle}</p>
+            <p className="text-sm font-semibold text-gray-600 mt-0.5">{personalInfo.jobTitle}</p>
           )}
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
             {personalInfo.email && (
@@ -104,7 +104,7 @@ export default function CVPreview() {
               <div key={exp.id}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-[11px] font-bold text-[#1a3c6e]">{exp.jobTitle}</p>
+                    <p className="text-[11px] font-bold text-black">{exp.jobTitle}</p>
                     <p className="text-[10px] font-semibold text-gray-600">{exp.company}{exp.location ? ` · ${exp.location}` : ""}</p>
                   </div>
                   <p className="text-[9.5px] text-gray-500 shrink-0 mt-0.5">
@@ -129,7 +129,7 @@ export default function CVPreview() {
             {education.map((edu) => (
               <div key={edu.id} className="flex justify-between items-start">
                 <div>
-                  <p className="text-[11px] font-bold text-[#1a3c6e]">{edu.degree}{edu.field ? ` في ${edu.field}` : ""}</p>
+                  <p className="text-[11px] font-bold text-black">{edu.degree}{edu.field ? ` في ${edu.field}` : ""}</p>
                   <p className="text-[10px] text-gray-600">{edu.institution}{edu.gpa ? ` · المعدل: ${edu.gpa}` : ""}</p>
                   {edu.description && <p className="text-[9.5px] text-gray-500 mt-0.5">{edu.description}</p>}
                 </div>
@@ -154,7 +154,7 @@ export default function CVPreview() {
                 </div>
                 <div className="h-1 bg-gray-200 rounded-full">
                   <div
-                    className="h-full bg-[#1a3c6e] rounded-full"
+                    className="h-full bg-black rounded-full"
                     style={{ width: skillLevelWidth(skill.level) }}
                   />
                 </div>
