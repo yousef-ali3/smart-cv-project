@@ -64,6 +64,7 @@ export default function HomePage() {
       <header className="border-b border-border bg-background sticky top-0 z-50">
         <div className="py-4 text-center">
           <h1 className="text-3xl font-black tracking-tight text-foreground">سيرتك الذكية</h1>
+          <p className="text-sm text-muted-foreground mt-1 font-medium">أنشئ سيرتك الذاتية الاحترافية خلال دقائق</p>
         </div>
       </header>
 
