@@ -1,13 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCVContext } from "@/context/CVContext";
 import { PersonalInfo } from "@/types/cv";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { User, Mail, Phone, MapPin, Globe, Linkedin, Briefcase } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { User, Mail, Phone, MapPin, Globe, Linkedin, Briefcase, Sparkles, Info } from "lucide-react";
 
 const schema = z.object({
   fullName: z.string().min(1, "الاسم مطلوب"),
@@ -24,6 +25,8 @@ type FormValues = z.infer<typeof schema>;
 
 export default function PersonalInfoStep() {
   const { cvData, updateCVData } = useCVContext();
+  const [improving, setImproving] = useState(false);
+  const [showTip, setShowTip] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -36,6 +39,33 @@ export default function PersonalInfoStep() {
     });
     return () => subscription.unsubscribe();
   }, [form, updateCVData]);
+
+  const handleImproveSummary = async () => {
+    const text = form.getValues("summary") || "";
+    if (!text.trim()) {
+      alert("الرجاء كتابة ملخصك أولاً قبل التحسين.");
+      return;
+    }
+    setImproving(true);
+    try {
+      const res = await fetch("/api/ai/improve-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (data.improved) {
+        form.setValue("summary", data.improved);
+        updateCVData({ personalInfo: { ...form.getValues(), summary: data.improved } });
+      } else {
+        alert("حدث خطأ أثناء التحسين. حاول مرة أخرى.");
+      }
+    } catch {
+      alert("تعذّر الاتصال بالخدمة. تأكد من الاتصال بالإنترنت وحاول مجدداً.");
+    } finally {
+      setImproving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -149,7 +179,43 @@ export default function PersonalInfoStep() {
             name="summary"
             render={({ field }) => (
               <FormItem className="sm:col-span-2">
-                <FormLabel>الملخص المهني</FormLabel>
+                <div className="flex items-center justify-between mb-1">
+                  <FormLabel className="mb-0">الملخص المهني</FormLabel>
+                  <div className="flex items-center gap-2">
+                    {/* Tooltip trigger */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onMouseEnter={() => setShowTip(true)}
+                        onMouseLeave={() => setShowTip(false)}
+                        onFocus={() => setShowTip(true)}
+                        onBlur={() => setShowTip(false)}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="معلومات عن تحسين النص"
+                      >
+                        <Info className="w-4 h-4" />
+                      </button>
+                      {showTip && (
+                        <div className="absolute left-0 top-6 z-50 w-64 rounded-lg border border-border bg-popover p-3 text-xs text-popover-foreground shadow-md leading-relaxed">
+                          اكتب وصفك بشكل بسيط، ثم اضغط <strong>تحسين النص</strong> ليتم إعادة صياغته بطريقة احترافية مناسبة للسيرة الذاتية.
+                        </div>
+                      )}
+                    </div>
+                    {/* Improve button */}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleImproveSummary}
+                      disabled={improving}
+                      className="h-7 text-xs gap-1.5"
+                      data-testid="button-improve-summary"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      {improving ? "جارٍ التحسين..." : "تحسين النص"}
+                    </Button>
+                  </div>
+                </div>
                 <FormControl>
                   <Textarea
                     placeholder="اكتب ملخصاً مختصراً عن خبراتك ومهاراتك وأهدافك المهنية..."
