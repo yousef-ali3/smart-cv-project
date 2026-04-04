@@ -27,6 +27,7 @@ export default function PersonalInfoStep() {
   const { cvData, updateCVData } = useCVContext();
   const [improving, setImproving] = useState(false);
   const [showTip, setShowTip] = useState(false);
+  const [originalSummary, setOriginalSummary] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -55,6 +56,7 @@ export default function PersonalInfoStep() {
       });
       const data = await res.json();
       if (data.improved) {
+        setOriginalSummary(text);
         form.setValue("summary", data.improved);
         updateCVData({ personalInfo: { ...form.getValues(), summary: data.improved } });
       } else {
@@ -65,6 +67,13 @@ export default function PersonalInfoStep() {
     } finally {
       setImproving(false);
     }
+  };
+
+  const handleRestoreOriginal = () => {
+    if (originalSummary === null) return;
+    form.setValue("summary", originalSummary);
+    updateCVData({ personalInfo: { ...form.getValues(), summary: originalSummary } });
+    setOriginalSummary(null);
   };
 
   return (
@@ -224,6 +233,16 @@ export default function PersonalInfoStep() {
                     data-testid="textarea-summary"
                   />
                 </FormControl>
+                {originalSummary !== null && (
+                  <button
+                    type="button"
+                    onClick={handleRestoreOriginal}
+                    className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors mt-1 block"
+                    data-testid="button-restore-summary"
+                  >
+                    ↩ رجوع للنص الأصل
+                  </button>
+                )}
                 <FormMessage />
               </FormItem>
             )}
