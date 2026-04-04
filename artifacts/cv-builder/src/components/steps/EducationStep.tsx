@@ -88,18 +88,9 @@ function EducationCard({
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">تاريخ البداية</Label>
+              <Label className="text-xs">سنة التخرج</Label>
               <Input
-                placeholder="2018"
-                value={edu.startDate}
-                onChange={(e) => onUpdate(edu.id, { startDate: e.target.value })}
-                data-testid={`input-edu-start-${edu.id}`}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">تاريخ التخرج</Label>
-              <Input
-                placeholder="2022 أو حتى الآن"
+                placeholder="مثال: 2022"
                 value={edu.endDate}
                 onChange={(e) => onUpdate(edu.id, { endDate: e.target.value })}
                 data-testid={`input-edu-end-${edu.id}`}

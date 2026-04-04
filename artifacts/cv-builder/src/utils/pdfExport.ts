@@ -45,7 +45,7 @@ export function generatePrintHTML(cvData: CVData): string {
           <div class="entry-sub">${edu.institution || ""}${edu.gpa ? " · المعدل: " + edu.gpa : ""}</div>
           ${edu.description ? `<div class="entry-desc">${edu.description}</div>` : ""}
         </div>
-        <div class="entry-date">${edu.startDate || ""}${(edu.startDate || edu.endDate) ? " – " : ""}${edu.endDate || ""}</div>
+        ${edu.endDate ? `<div class="entry-date">${edu.endDate}</div>` : ""}
       </div>
     </div>`).join("")) : "";
 

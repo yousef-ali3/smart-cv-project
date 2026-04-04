@@ -115,9 +115,9 @@ export default function CVPreview() {
                   <p className="text-[10px] text-gray-600">{edu.institution}{edu.gpa ? ` · المعدل: ${edu.gpa}` : ""}</p>
                   {edu.description && <p className="text-[9.5px] text-gray-500 mt-0.5">{edu.description}</p>}
                 </div>
-                <p className="text-[9.5px] text-gray-500 shrink-0 mt-0.5">
-                  {edu.startDate}{(edu.startDate || edu.endDate) && " – "}{edu.endDate}
-                </p>
+                {edu.endDate && (
+                  <p className="text-[9.5px] text-gray-500 shrink-0 mt-0.5">{edu.endDate}</p>
+                )}
               </div>
             ))}
           </div>
