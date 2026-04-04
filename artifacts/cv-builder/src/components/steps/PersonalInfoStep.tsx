@@ -53,7 +53,7 @@ export default function PersonalInfoStep() {
               <FormItem className="sm:col-span-2">
                 <FormLabel className="flex items-center gap-2"><User className="w-4 h-4" />الاسم الكامل *</FormLabel>
                 <FormControl>
-                  <Input placeholder="مثال: محمد عبدالله الأحمدي" {...field} data-testid="input-full-name" />
+                  <Input placeholder="" {...field} data-testid="input-full-name" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
