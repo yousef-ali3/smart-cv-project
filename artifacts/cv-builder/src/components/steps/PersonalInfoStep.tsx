@@ -67,7 +67,7 @@ export default function PersonalInfoStep() {
               <FormItem className="sm:col-span-2">
                 <FormLabel className="flex items-center gap-2"><Briefcase className="w-4 h-4" />المسمى الوظيفي</FormLabel>
                 <FormControl>
-                  <Input placeholder="مهندس برمجيات | محاسب قانوني" {...field} data-testid="input-job-title" />
+                  <Input placeholder="مثال: مهندس برمجيات | محاسب قانوني" {...field} data-testid="input-job-title" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -109,7 +109,7 @@ export default function PersonalInfoStep() {
               <FormItem>
                 <FormLabel className="flex items-center gap-2"><MapPin className="w-4 h-4" />الموقع / المدينة</FormLabel>
                 <FormControl>
-                  <Input placeholder="الرياض، المملكة العربية السعودية" {...field} data-testid="input-location" />
+                  <Input placeholder="مثال: الرياض، المملكة العربية السعودية" {...field} data-testid="input-location" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
