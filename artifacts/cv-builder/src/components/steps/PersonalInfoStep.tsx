@@ -199,10 +199,10 @@ export default function PersonalInfoStep() {
                         onMouseLeave={() => setShowTip(false)}
                         onFocus={() => setShowTip(true)}
                         onBlur={() => setShowTip(false)}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center hover:bg-black/80 transition-colors"
                         aria-label="معلومات عن تحسين النص"
                       >
-                        <Info className="w-4 h-4" />
+                        <Info className="w-3.5 h-3.5" />
                       </button>
                       {showTip && (
                         <div className="absolute left-0 top-6 z-50 w-64 rounded-lg border border-border bg-popover p-3 text-xs text-popover-foreground shadow-md leading-relaxed">
@@ -214,10 +214,9 @@ export default function PersonalInfoStep() {
                     <Button
                       type="button"
                       size="sm"
-                      variant="outline"
                       onClick={handleImproveSummary}
                       disabled={improving}
-                      className="h-7 text-xs gap-1.5"
+                      className="h-7 text-xs gap-1.5 bg-black text-white hover:bg-black/80"
                       data-testid="button-improve-summary"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
