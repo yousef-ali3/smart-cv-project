@@ -46,6 +46,18 @@ const SKILLS = [
 const LEVELS = ["مبتدئ", "متوسط", "متقدم"] as const;
 type Level = (typeof LEVELS)[number];
 
+// إضافة حرف "ل" أمام كلمة مع التعامل الصحيح مع "ال" التعريف
+// أمثلة: "الحصول" → "للحصول"  |  "اكتساب" → "لاكتساب"  |  "تطوير" → "لتطوير"
+function lamPrefix(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed) return "";
+  // إذا بدأت الكلمة بـ "ال" التعريف، نستبدل الألف بحرف اللام
+  if (trimmed.startsWith("ال")) {
+    return "ل" + trimmed.slice(1);
+  }
+  return "ل" + trimmed;
+}
+
 // منطق إنشاء النص من خيارات المساعد
 function buildSummary(opts: {
   specialty: string;
@@ -62,13 +74,13 @@ function buildSummary(opts: {
 
   const parts: string[] = [];
 
-  // التخصص + الهدف
+  // التخصص + الهدف (مع معالجة حرف اللام بشكل صحيح)
   if (specialty && goal) {
-    parts.push(`أسعى للعمل في مجال ${specialty} لـ${goal}`);
+    parts.push(`أسعى للعمل في مجال ${specialty.trim()} ${lamPrefix(goal)}`);
   } else if (specialty) {
-    parts.push(`أسعى للعمل في مجال ${specialty}`);
+    parts.push(`أسعى للعمل في مجال ${specialty.trim()}`);
   } else if (goal) {
-    parts.push(`أسعى لـ${goal}`);
+    parts.push(`أسعى ${lamPrefix(goal)}`);
   }
 
   // المهارات
@@ -297,24 +309,35 @@ export default function ProfessionalSummary({
             </div>
           )}
 
-          {/* خطوة 2 — الهدف الوظيفي */}
+          {/* خطوة 2 — الهدف الوظيفي (كتابة حرة + اقتراحات) */}
           {step === 1 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <p className="text-xs text-muted-foreground">
-                ما هو هدفك الوظيفي؟ (اختياري)
+                اكتب هدفك الوظيفي أو اختر من الاقتراحات (اختياري)
               </p>
-              <Select value={goal} onValueChange={setGoal}>
-                <SelectTrigger data-testid="select-goal">
-                  <SelectValue placeholder="اختر الهدف..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {GOALS.map((g) => (
-                    <SelectItem key={g} value={g}>
-                      {g}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                placeholder="مثال: قيادة فريق تطوير، إدارة مشاريع كبرى..."
+                data-testid="input-goal"
+              />
+              <div className="flex flex-wrap gap-1.5">
+                {GOALS.map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGoal(g)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+                      goal === g
+                        ? "bg-black text-white border-black"
+                        : "border-border hover:bg-muted"
+                    }`}
+                    data-testid={`chip-goal-${g}`}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
