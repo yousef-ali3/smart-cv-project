@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useCVContext } from "@/context/CVContext";
 import { PersonalInfo } from "@/types/cv";
 import {
@@ -13,8 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import ProfessionalSummary from "@/components/ProfessionalSummary";
 import {
   User,
   Mail,
@@ -23,8 +22,6 @@ import {
   Globe,
   Linkedin,
   Briefcase,
-  Sparkles,
-  Info,
 } from "lucide-react";
 
 const schema = z.object({
@@ -46,9 +43,6 @@ type FormValues = z.infer<typeof schema>;
 
 export default function PersonalInfoStep() {
   const { cvData, updateCVData } = useCVContext();
-  const [improving, setImproving] = useState(false);
-  const [showTip, setShowTip] = useState(false);
-  const [originalSummary, setOriginalSummary] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -61,49 +55,6 @@ export default function PersonalInfoStep() {
     });
     return () => subscription.unsubscribe();
   }, [form, updateCVData]);
-
-  const handleImproveSummary = async () => {
-    const text = form.getValues("summary") || "";
-    if (!text.trim()) {
-      alert("الرجاء كتابة ملخصك أولاً قبل التحسين.");
-      return;
-    }
-    setImproving(true);
-    try {
-      // Smart relative URL — works in both environments automatically:
-      // - Locally: Vite dev server proxies /api → Express backend
-      // - On Vercel: hits the serverless function at artifacts/cv-builder/api/ai/improve-summary.ts
-      const res = await fetch("/api/ai/improve-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-
-      const data = await res.json();
-      if (data.improved) {
-        setOriginalSummary(text);
-        form.setValue("summary", data.improved);
-        updateCVData({
-          personalInfo: { ...form.getValues(), summary: data.improved },
-        });
-      } else {
-        alert("حدث خطأ أثناء التحسين. حاول مرة أخرى.");
-      }
-    } catch {
-      alert("تعذّر الاتصال بالخدمة. تأكد من الاتصال بالإنترنت وحاول مجدداً.");
-    } finally {
-      setImproving(false);
-    }
-  };
-
-  const handleRestoreOriginal = () => {
-    if (originalSummary === null) return;
-    form.setValue("summary", originalSummary);
-    updateCVData({
-      personalInfo: { ...form.getValues(), summary: originalSummary },
-    });
-    setOriginalSummary(null);
-  };
 
   return (
     <div className="space-y-6">
@@ -266,67 +217,21 @@ export default function PersonalInfoStep() {
             )}
           />
 
+          {/* مكوّن الملخص المهني (كتابة يدوية أو مساعد) */}
           <FormField
             control={form.control}
             name="summary"
             render={({ field }) => (
               <FormItem className="sm:col-span-2">
-                <div className="flex items-center justify-between mb-1">
-                  <FormLabel className="mb-0">الملخص المهني</FormLabel>
-                  <div className="flex items-center gap-2">
-                    {/* Tooltip trigger */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onMouseEnter={() => setShowTip(true)}
-                        onMouseLeave={() => setShowTip(false)}
-                        onFocus={() => setShowTip(true)}
-                        onBlur={() => setShowTip(false)}
-                        className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                        aria-label="معلومات عن تحسين النص"
-                      >
-                        <Info className="w-3.5 h-3.5" />
-                      </button>
-                      {showTip && (
-                        <div className="absolute left-0 top-6 z-50 w-64 rounded-lg border border-border bg-popover p-3 text-xs text-popover-foreground shadow-md leading-relaxed">
-                          اكتب وصفك بشكل بسيط، ثم اضغط{" "}
-                          <strong>تحسين النص</strong> ليتم إعادة صياغته بطريقة
-                          احترافية مناسبة للسيرة الذاتية.
-                        </div>
-                      )}
-                    </div>
-                    {/* Improve button */}
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleImproveSummary}
-                      disabled={improving}
-                      className="h-7 text-xs gap-1.5 bg-black text-white hover:bg-black/80"
-                      data-testid="button-improve-summary"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      {improving ? "جارٍ التحسين..." : "تحسين النص"}
-                    </Button>
-                  </div>
-                </div>
-                <FormControl>
-                  <Textarea
-                    placeholder="اكتب ملخصاً مختصراً عن خبراتك ومهاراتك وأهدافك المهنية..."
-                    className="min-h-[100px] resize-none"
-                    {...field}
-                    data-testid="textarea-summary"
-                  />
-                </FormControl>
-                {originalSummary !== null && (
-                  <button
-                    type="button"
-                    onClick={handleRestoreOriginal}
-                    className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors mt-1 block"
-                    data-testid="button-restore-summary"
-                  >
-                    ↩ رجوع للنص الأصل
-                  </button>
-                )}
+                <ProfessionalSummary
+                  value={field.value || ""}
+                  onChange={(val) => {
+                    form.setValue("summary", val, { shouldValidate: true });
+                    updateCVData({
+                      personalInfo: { ...form.getValues(), summary: val },
+                    });
+                  }}
+                />
                 <FormMessage />
               </FormItem>
             )}

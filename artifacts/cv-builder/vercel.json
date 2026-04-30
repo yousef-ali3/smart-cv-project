@@ -3,10 +3,5 @@
   "framework": "vite",
   "buildCommand": "PORT=3000 BASE_PATH=/ pnpm build",
   "outputDirectory": "dist/public",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile=false",
-  "functions": {
-    "api/ai/improve-summary.ts": {
-      "maxDuration": 30
-    }
-  }
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile=false"
 }
