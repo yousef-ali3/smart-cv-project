@@ -75,5 +75,9 @@
     "vite": "catalog:",
     "wouter": "^3.3.5",
     "zod": "catalog:"
+  },
+  "dependencies": {
+    "@vercel/node": "^5.7.13",
+    "openai": "^6.33.0"
   }
 }

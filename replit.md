@@ -94,3 +94,34 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+
+
+---
+
+## CV Builder (سيرتك الذكية)
+
+**Location**: `artifacts/cv-builder/`
+
+**Stack**: React + Vite + Tailwind + shadcn/ui, RTL Arabic, black/white theme
+
+**Features**:
+- 5-step form: personal info → education → experience → skills/courses → template selection
+- 4 CV templates: ATS Classic, Modern, Corporate, Minimal — live preview reflects choice
+- AI "تحسين النص" (improve summary) feature using OpenAI gpt-4o-mini
+- Single-button "حفظ PDF و طباعة" — opens browser print dialog (works for both Save as PDF and printing)
+
+**AI Endpoint Architecture (dual-mode)**:
+
+Frontend calls relative URL `/api/ai/improve-summary`. This works in both environments:
+
+1. **Local dev (Replit)**: Vite proxy → Express server at `artifacts/api-server` (uses `AI_INTEGRATIONS_OPENAI_*` env vars from Replit AI Integrations)
+2. **Production (Vercel)**: Serverless function at `artifacts/cv-builder/api/ai/improve-summary.ts` (uses standard `OPENAI_API_KEY` env var)
+
+Same code, different runtime. No environment-aware logic in the frontend.
+
+**Vercel Deployment**:
+- Config in `artifacts/cv-builder/vercel.json`
+- Detailed guide in `artifacts/cv-builder/DEPLOY.md`
+- Required env var: `OPENAI_API_KEY`
+- Root Directory in Vercel UI: `artifacts/cv-builder`
+

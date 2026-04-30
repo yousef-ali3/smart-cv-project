@@ -70,14 +70,12 @@ export default function PersonalInfoStep() {
     }
     setImproving(true);
     try {
-      const res = await fetch(
-        "https://smart-cv-api-server-p6aceuu9i-yousef-ali2s-projects.vercel.app/api/ai/improve-summary",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-        },
-      );
+      // Relative URL — works in dev (Vite proxy → Express) AND on Vercel (serverless function)
+      const res = await fetch("/api/ai/improve-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
 
       const data = await res.json();
       if (data.improved) {

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "PORT=3000 BASE_PATH=/ pnpm build",
+  "outputDirectory": "dist/public",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile=false",
+  "functions": {
+    "api/ai/improve-summary.ts": {
+      "memory": 512,
+      "maxDuration": 30
+    }
+  }
+}
