@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, KeyboardEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -17,6 +18,8 @@ import {
   ChevronLeft,
   PenLine,
   Wand2,
+  Plus,
+  X,
 } from "lucide-react";
 
 // خيارات المساعد (Wizard)
@@ -124,6 +127,22 @@ export default function ProfessionalSummary({
     setSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
     );
+  };
+
+  // إدخال مهارة مخصصة
+  const [customSkill, setCustomSkill] = useState("");
+  const addCustomSkill = () => {
+    const trimmed = customSkill.trim();
+    if (trimmed && !skills.includes(trimmed)) {
+      setSkills((prev) => [...prev, trimmed]);
+    }
+    setCustomSkill("");
+  };
+  const handleSkillKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addCustomSkill();
+    }
   };
 
   // نسخ النص إلى الحافظة
@@ -246,24 +265,35 @@ export default function ProfessionalSummary({
             ))}
           </div>
 
-          {/* خطوة 1 — التخصص */}
+          {/* خطوة 1 — التخصص (كتابة حرة + اقتراحات) */}
           {step === 0 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <p className="text-xs text-muted-foreground">
-                اختر تخصصك المهني (اختياري)
+                اكتب تخصصك المهني أو اختر من الاقتراحات (اختياري)
               </p>
-              <Select value={specialty} onValueChange={setSpecialty}>
-                <SelectTrigger data-testid="select-specialty">
-                  <SelectValue placeholder="اختر التخصص..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {SPECIALTIES.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                value={specialty}
+                onChange={(e) => setSpecialty(e.target.value)}
+                placeholder="مثال: تصميم جرافيك، تسويق رقمي، طب الأسنان..."
+                data-testid="input-specialty"
+              />
+              <div className="flex flex-wrap gap-1.5">
+                {SPECIALTIES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSpecialty(s)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+                      specialty === s
+                        ? "bg-black text-white border-black"
+                        : "border-border hover:bg-muted"
+                    }`}
+                    data-testid={`chip-specialty-${s}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -288,12 +318,14 @@ export default function ProfessionalSummary({
             </div>
           )}
 
-          {/* خطوة 3 — المهارات */}
+          {/* خطوة 3 — المهارات (اختيار + كتابة حرة) */}
           {step === 2 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <p className="text-xs text-muted-foreground">
-                اختر مهاراتك (يمكن اختيار أكثر من واحدة — اختياري)
+                اختر من الاقتراحات أو اكتب مهاراتك الخاصة (اختياري)
               </p>
+
+              {/* اقتراحات سريعة */}
               <div className="grid grid-cols-2 gap-2">
                 {SKILLS.map((s) => (
                   <label
@@ -309,6 +341,51 @@ export default function ProfessionalSummary({
                   </label>
                 ))}
               </div>
+
+              {/* إدخال مهارة مخصصة */}
+              <div className="flex gap-2">
+                <Input
+                  value={customSkill}
+                  onChange={(e) => setCustomSkill(e.target.value)}
+                  onKeyDown={handleSkillKeyDown}
+                  placeholder="أضف مهارة أخرى ثم اضغط Enter..."
+                  className="flex-1"
+                  data-testid="input-custom-skill"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={addCustomSkill}
+                  className="bg-black text-white hover:bg-black/80"
+                  data-testid="button-add-skill"
+                >
+                  <Plus className="w-4 h-4 ml-1" />
+                  إضافة
+                </Button>
+              </div>
+
+              {/* عرض المهارات المختارة كـ chips */}
+              {skills.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {skills.map((s) => (
+                    <span
+                      key={s}
+                      className="inline-flex items-center gap-1 text-xs bg-black text-white rounded-full pr-2 pl-1 py-1"
+                    >
+                      {s}
+                      <button
+                        type="button"
+                        onClick={() => toggleSkill(s)}
+                        className="hover:bg-white/20 rounded-full p-0.5"
+                        aria-label={`حذف ${s}`}
+                        data-testid={`button-remove-skill-${s}`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
