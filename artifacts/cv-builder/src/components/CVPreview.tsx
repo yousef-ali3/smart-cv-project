@@ -44,9 +44,12 @@ function ATSTemplate({ d }: { d: CVData }) {
         </div>
       ))}</Section>}
       {education.length > 0 && <Section title="المؤهلات العلمية">{education.map(e => (
-        <div key={e.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-          <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
-          {e.endDate && <div style={{ fontSize: 9.5, color: "#777", whiteSpace: "nowrap" }}>{e.endDate}</div>}
+        <div key={e.id} style={{ marginBottom: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
+            {e.endDate && <div style={{ fontSize: 9.5, color: "#777", whiteSpace: "nowrap" }}>{e.endDate}</div>}
+          </div>
+          {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
         </div>
       ))}</Section>}
       {skills.length > 0 && <Section title="المهارات"><div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{skills.map(s => <span key={s.id} style={{ fontSize: 9.5, background: "#f0f0f0", border: "1px solid #ddd", borderRadius: 4, padding: "2px 10px" }}>{s.name}</span>)}</div></Section>}
@@ -109,9 +112,12 @@ function ModernTemplate({ d }: { d: CVData }) {
         </div>
       )))}
       {education.length > 0 && sec("المؤهلات العلمية", education.map(e => (
-        <div key={e.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, paddingRight: 8 }}>
-          <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
-          {e.endDate && <div style={{ fontSize: 9.5, color: "#777", background: "#f5f5f5", padding: "2px 8px", borderRadius: 12 }}>{e.endDate}</div>}
+        <div key={e.id} style={{ marginBottom: 8, paddingRight: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
+            {e.endDate && <div style={{ fontSize: 9.5, color: "#777", background: "#f5f5f5", padding: "2px 8px", borderRadius: 12, alignSelf: "flex-start" }}>{e.endDate}</div>}
+          </div>
+          {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
         </div>
       )))}
       {skills.length > 0 && sec("المهارات", <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingRight: 8 }}>{skills.map(s => <span key={s.id} style={{ fontSize: 9.5, background: "#111", color: "#fff", borderRadius: 4, padding: "2px 10px" }}>{s.name}</span>)}</div>)}
@@ -161,9 +167,12 @@ function CorporateTemplate({ d }: { d: CVData }) {
           </div>
         )))}
         {education.length > 0 && sec("المؤهلات العلمية", education.map(e => (
-          <div key={e.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-            <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
-            {e.endDate && <div style={{ fontSize: 9.5, color: "#777" }}>{e.endDate}</div>}
+          <div key={e.id} style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
+              {e.endDate && <div style={{ fontSize: 9.5, color: "#666", whiteSpace: "nowrap" }}>{e.endDate}</div>}
+            </div>
+            {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 4, whiteSpace: "pre-line" }}>{e.description}</div>}
           </div>
         )))}
         {skills.length > 0 && sec("المهارات", <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{skills.map(s => <span key={s.id} style={{ fontSize: 9.5, border: "1.5px solid #111", borderRadius: 3, padding: "2px 10px", fontWeight: 500 }}>{s.name}</span>)}</div>)}
@@ -215,9 +224,12 @@ function MinimalTemplate({ d }: { d: CVData }) {
         </div>
       )))}
       {education.length > 0 && sec("التعليم", education.map(e => (
-        <div key={e.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-          <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#777" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
-          {e.endDate && <div style={{ fontSize: 9, color: "#999", fontStyle: "italic" }}>{e.endDate}</div>}
+        <div key={e.id} style={{ marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#777" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
+            {e.endDate && <div style={{ fontSize: 9, color: "#999", fontStyle: "italic", whiteSpace: "nowrap" }}>{e.endDate}</div>}
+          </div>
+          {e.description && <div style={{ fontSize: 10, color: "#555", marginTop: 4, whiteSpace: "pre-line", lineHeight: 1.7 }}>{e.description}</div>}
         </div>
       )))}
       {skills.length > 0 && sec("المهارات", <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{skills.map(s => <span key={s.id} style={{ fontSize: 9.5, background: "#f8f8f8", color: "#333", padding: "3px 12px", borderRadius: 20, border: "1px solid #e5e5e5" }}>{s.name}</span>)}</div>)}
