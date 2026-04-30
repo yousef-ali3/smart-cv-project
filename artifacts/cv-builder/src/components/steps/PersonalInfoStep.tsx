@@ -4,16 +4,37 @@ import { z } from "zod";
 import { useEffect, useState } from "react";
 import { useCVContext } from "@/context/CVContext";
 import { PersonalInfo } from "@/types/cv";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Phone, MapPin, Globe, Linkedin, Briefcase, Sparkles, Info } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  Linkedin,
+  Briefcase,
+  Sparkles,
+  Info,
+} from "lucide-react";
 
 const schema = z.object({
   fullName: z.string().min(1, "الاسم مطلوب"),
   jobTitle: z.string().optional().default(""),
-  email: z.string().email("البريد الإلكتروني غير صحيح").or(z.literal("")).default(""),
+  email: z
+    .string()
+    .email("البريد الإلكتروني غير صحيح")
+    .or(z.literal(""))
+    .default(""),
   phone: z.string().optional().default(""),
   location: z.string().optional().default(""),
   website: z.string().optional().default(""),
@@ -49,16 +70,22 @@ export default function PersonalInfoStep() {
     }
     setImproving(true);
     try {
-      const res = await fetch("/api/ai/improve-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
+      const res = await fetch(
+        "https://smart-cv-api-server-p6aceuu9i-yousef-ali2s-projects.vercel.app/api/ai/improve-summary",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        },
+      );
+
       const data = await res.json();
       if (data.improved) {
         setOriginalSummary(text);
         form.setValue("summary", data.improved);
-        updateCVData({ personalInfo: { ...form.getValues(), summary: data.improved } });
+        updateCVData({
+          personalInfo: { ...form.getValues(), summary: data.improved },
+        });
       } else {
         alert("حدث خطأ أثناء التحسين. حاول مرة أخرى.");
       }
@@ -72,15 +99,21 @@ export default function PersonalInfoStep() {
   const handleRestoreOriginal = () => {
     if (originalSummary === null) return;
     form.setValue("summary", originalSummary);
-    updateCVData({ personalInfo: { ...form.getValues(), summary: originalSummary } });
+    updateCVData({
+      personalInfo: { ...form.getValues(), summary: originalSummary },
+    });
     setOriginalSummary(null);
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-1">المعلومات الشخصية</h2>
-        <p className="text-sm text-muted-foreground">أدخل بياناتك الشخصية الأساسية</p>
+        <h2 className="text-xl font-bold text-foreground mb-1">
+          المعلومات الشخصية
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          أدخل بياناتك الشخصية الأساسية
+        </p>
       </div>
 
       <Form {...form}>
@@ -90,9 +123,16 @@ export default function PersonalInfoStep() {
             name="fullName"
             render={({ field }) => (
               <FormItem className="sm:col-span-2">
-                <FormLabel className="flex items-center gap-2"><User className="w-4 h-4" />الاسم الكامل *</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  الاسم الكامل *
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="" {...field} data-testid="input-full-name" />
+                  <Input
+                    placeholder=""
+                    {...field}
+                    data-testid="input-full-name"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -104,9 +144,16 @@ export default function PersonalInfoStep() {
             name="jobTitle"
             render={({ field }) => (
               <FormItem className="sm:col-span-2">
-                <FormLabel className="flex items-center gap-2"><Briefcase className="w-4 h-4" />المسمى الوظيفي</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  المسمى الوظيفي
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="مثال: مهندس برمجيات | محاسب قانوني" {...field} data-testid="input-job-title" />
+                  <Input
+                    placeholder="مثال: مهندس برمجيات | محاسب قانوني"
+                    {...field}
+                    data-testid="input-job-title"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -118,9 +165,17 @@ export default function PersonalInfoStep() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2"><Mail className="w-4 h-4" />البريد الإلكتروني</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  البريد الإلكتروني
+                </FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="example@email.com" {...field} data-testid="input-email" />
+                  <Input
+                    type="email"
+                    placeholder="example@email.com"
+                    {...field}
+                    data-testid="input-email"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -132,9 +187,16 @@ export default function PersonalInfoStep() {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2"><Phone className="w-4 h-4" />رقم الهاتف</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  رقم الهاتف
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="+966 5x xxx xxxx" {...field} data-testid="input-phone" />
+                  <Input
+                    placeholder="+966 5x xxx xxxx"
+                    {...field}
+                    data-testid="input-phone"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -146,9 +208,16 @@ export default function PersonalInfoStep() {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2"><MapPin className="w-4 h-4" />الموقع / المدينة</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  الموقع / المدينة
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="مثال: الرياض، المملكة العربية السعودية" {...field} data-testid="input-location" />
+                  <Input
+                    placeholder="مثال: الرياض، المملكة العربية السعودية"
+                    {...field}
+                    data-testid="input-location"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -160,9 +229,16 @@ export default function PersonalInfoStep() {
             name="linkedin"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2"><Linkedin className="w-4 h-4" />LinkedIn</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <Linkedin className="w-4 h-4" />
+                  LinkedIn
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="linkedin.com/in/username" {...field} data-testid="input-linkedin" />
+                  <Input
+                    placeholder="linkedin.com/in/username"
+                    {...field}
+                    data-testid="input-linkedin"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -174,9 +250,16 @@ export default function PersonalInfoStep() {
             name="website"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2"><Globe className="w-4 h-4" />الموقع الشخصي</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  الموقع الشخصي
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="www.myportfolio.com" {...field} data-testid="input-website" />
+                  <Input
+                    placeholder="www.myportfolio.com"
+                    {...field}
+                    data-testid="input-website"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -206,7 +289,9 @@ export default function PersonalInfoStep() {
                       </button>
                       {showTip && (
                         <div className="absolute left-0 top-6 z-50 w-64 rounded-lg border border-border bg-popover p-3 text-xs text-popover-foreground shadow-md leading-relaxed">
-                          اكتب وصفك بشكل بسيط، ثم اضغط <strong>تحسين النص</strong> ليتم إعادة صياغته بطريقة احترافية مناسبة للسيرة الذاتية.
+                          اكتب وصفك بشكل بسيط، ثم اضغط{" "}
+                          <strong>تحسين النص</strong> ليتم إعادة صياغته بطريقة
+                          احترافية مناسبة للسيرة الذاتية.
                         </div>
                       )}
                     </div>

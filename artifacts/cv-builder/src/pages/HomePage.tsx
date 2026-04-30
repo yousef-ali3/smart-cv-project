@@ -5,12 +5,13 @@ import PersonalInfoStep from "@/components/steps/PersonalInfoStep";
 import EducationStep from "@/components/steps/EducationStep";
 import ExperienceStep from "@/components/steps/ExperienceStep";
 import SkillsStep from "@/components/steps/SkillsStep";
+import TemplateSelectStep from "@/components/steps/TemplateSelectStep";
 import CVPreview from "@/components/CVPreview";
 import { Button } from "@/components/ui/button";
 import { exportToPDF } from "@/utils/pdfExport";
 import {
-  User, GraduationCap, Briefcase, Zap, ChevronRight, ChevronLeft,
-  Download, Eye, EyeOff, Printer
+  User, GraduationCap, Briefcase, Zap, LayoutTemplate,
+  ChevronRight, ChevronLeft, Printer, Eye, EyeOff
 } from "lucide-react";
 
 const STEPS = [
@@ -18,6 +19,7 @@ const STEPS = [
   { label: "المؤهلات العلمية", icon: <GraduationCap className="w-4 h-4" /> },
   { label: "الخبرات العملية", icon: <Briefcase className="w-4 h-4" /> },
   { label: "المهارات والدورات", icon: <Zap className="w-4 h-4" /> },
+  { label: "اختيار القالب", icon: <LayoutTemplate className="w-4 h-4" /> },
 ];
 
 function renderStep(step: number) {
@@ -26,12 +28,13 @@ function renderStep(step: number) {
     case 1: return <EducationStep />;
     case 2: return <ExperienceStep />;
     case 3: return <SkillsStep />;
+    case 4: return <TemplateSelectStep />;
     default: return null;
   }
 }
 
 export default function HomePage() {
-  const { currentStep, setCurrentStep } = useCVContext();
+  const { currentStep, setCurrentStep, cvData, selectedTemplate } = useCVContext();
   const [showPreview, setShowPreview] = useState(false);
   const [exporting, setExporting] = useState(false);
 
@@ -43,20 +46,14 @@ export default function HomePage() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  const { cvData } = useCVContext();
-
   const handleExportPDF = useCallback(() => {
     setExporting(true);
     try {
-      exportToPDF(cvData);
+      exportToPDF(cvData, selectedTemplate);
     } finally {
       setExporting(false);
     }
-  }, [cvData]);
-
-  const handlePrint = () => {
-    window.print();
-  };
+  }, [cvData, selectedTemplate]);
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -78,7 +75,7 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Action bar — preview toggle + PDF + print */}
+        {/* Action bar — preview toggle + Save PDF & Print */}
         <div className="flex justify-end gap-2 mb-4">
           <Button
             variant="outline"
@@ -91,24 +88,14 @@ export default function HomePage() {
             {showPreview ? "إخفاء المعاينة" : "عرض المعاينة"}
           </Button>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrint}
-            className="text-xs"
-            data-testid="button-print"
-          >
-            <Printer className="w-3.5 h-3.5 ml-1" />
-            طباعة
-          </Button>
-          <Button
             size="sm"
             onClick={handleExportPDF}
             disabled={exporting}
-            className="text-xs"
-            data-testid="button-export-pdf"
+            className="text-xs bg-black text-white hover:bg-gray-800"
+            data-testid="button-save-pdf-print"
           >
-            <Download className="w-3.5 h-3.5 ml-1" />
-            {exporting ? "جارٍ التصدير..." : "تحميل PDF"}
+            <Printer className="w-3.5 h-3.5 ml-1" />
+            {exporting ? "جارٍ التحضير..." : "حفظ PDF و طباعة"}
           </Button>
         </div>
 
@@ -145,12 +132,13 @@ export default function HomePage() {
                 </Button>
               ) : (
                 <Button
-                  onClick={handleNext}
-                  className="flex items-center gap-2"
-                  data-testid="button-next-step-last"
+                  onClick={handleExportPDF}
+                  disabled={exporting}
+                  className="flex items-center gap-2 bg-black text-white hover:bg-gray-800"
+                  data-testid="button-finish-export"
                 >
-                  التالي
-                  <ChevronLeft className="w-4 h-4" />
+                  <Printer className="w-4 h-4" />
+                  {exporting ? "جارٍ التحضير..." : "حفظ PDF و طباعة"}
                 </Button>
               )}
             </div>
