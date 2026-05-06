@@ -225,17 +225,23 @@ export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
   printWindow.document.close();
 
   printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-    }, 600);
+    // Wait for Google Fonts (Noto Sans Arabic) to fully load before printing
+    printWindow.document.fonts.ready.then(() => {
+      // Extra small delay for final layout settle
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 200);
+    });
   };
 
-  // Fallback in case onload doesn't fire
+  // Fallback in case onload doesn't fire (e.g. some browsers)
   setTimeout(() => {
     try {
-      printWindow.focus();
-      printWindow.print();
+      printWindow.document.fonts.ready.then(() => {
+        printWindow.focus();
+        printWindow.print();
+      });
     } catch (_) {}
-  }, 1500);
+  }, 3000);
 }
