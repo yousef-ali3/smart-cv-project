@@ -59,7 +59,7 @@ function buildBlocks(cvData: CVData) {
 const baseCSS = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI','Noto Sans Arabic','Arial',sans-serif; color: #111; background: #fff; font-size: 11pt; line-height: 1.5; direction: rtl; }
-  .page { max-width: 210mm; margin: 0 auto; min-height: 297mm; }
+  .page { max-width: 210mm; margin: 0 auto; }
   .entry { margin-bottom: 10px; }
   .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
   .entry-title { font-size: 11pt; font-weight: 700; color: #000; }
@@ -230,43 +230,52 @@ export async function exportToPDF(cvData: CVData, templateId: TemplateId = "ats"
     const iframeDoc = iframe.contentDocument!;
     const pageEl = iframeDoc.querySelector<HTMLElement>(".page") || iframeDoc.body;
 
-    // Measure actual rendered height
-    const fullHeight = Math.max(pageEl.scrollHeight, 1122);
-    iframe.style.height = `${fullHeight}px`;
+    // Measure actual content height (no artificial min-height)
+    const contentHeight = pageEl.scrollHeight;
+    iframe.style.height = `${contentHeight}px`;
     await new Promise((r) => setTimeout(r, 100));
 
-    // Capture canvas at 2× for crisp output
+    // Capture at 2× for sharp output — use A4 width (794px = 210mm @ 96dpi)
+    const CANVAS_WIDTH = 794;
     const canvas = await html2canvas(iframeDoc.body, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
       backgroundColor: "#ffffff",
-      width: 794,
-      height: fullHeight,
-      windowWidth: 794,
-      windowHeight: fullHeight,
+      width: CANVAS_WIDTH,
+      height: contentHeight,
+      windowWidth: CANVAS_WIDTH,
+      windowHeight: contentHeight,
     });
 
-    // A4 dimensions in mm
-    const A4_W = 210;
-    const A4_H = 297;
+    // A4 dimensions
+    const A4_W = 210; // mm
+    const A4_H = 297; // mm
+    // How many mm tall the rendered content is
+    const renderedHeightMM = (canvas.height / canvas.width) * A4_W;
+    // Page height in canvas pixels (2× scale)
+    const pageHeightPx = Math.round((A4_H / A4_W) * canvas.width);
+    // Minimum meaningful slice — ignore trailing blank strips < 8mm
+    const minSlicePx = Math.round((8 / A4_W) * canvas.width);
+
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    // Clear default metadata
+    pdf.setProperties({ title: "", subject: "", author: "", creator: "", keywords: "" });
 
     const imgData = canvas.toDataURL("image/jpeg", 0.97);
-    const canvasAspect = canvas.height / canvas.width;
-    const renderedHeightMM = A4_W * canvasAspect;
 
-    if (renderedHeightMM <= A4_H) {
-      // Single page
-      pdf.addImage(imgData, "JPEG", 0, 0, A4_W, renderedHeightMM);
+    if (renderedHeightMM <= A4_H + 2) {
+      // Single page — render at actual height (no empty bottom strip)
+      pdf.addImage(imgData, "JPEG", 0, 0, A4_W, Math.min(renderedHeightMM, A4_H));
     } else {
-      // Multi-page: slice canvas into A4-sized chunks
-      const pageHeightPx = Math.floor((A4_H / A4_W) * canvas.width);
+      // Multi-page — slice canvas into A4-sized chunks
       let yOffset = 0;
-
       while (yOffset < canvas.height) {
+        const remaining = canvas.height - yOffset;
+        // Skip if the remaining slice is too thin (trailing whitespace)
+        if (remaining < minSlicePx) break;
         if (yOffset > 0) pdf.addPage();
-        const sliceH = Math.min(pageHeightPx, canvas.height - yOffset);
+        const sliceH = Math.min(pageHeightPx, remaining);
         const pageCanvas = document.createElement("canvas");
         pageCanvas.width = canvas.width;
         pageCanvas.height = pageHeightPx;
