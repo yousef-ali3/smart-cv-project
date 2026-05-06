@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { exportToPDF } from "@/utils/pdfExport";
 import {
   User, GraduationCap, Briefcase, Zap, LayoutTemplate,
-  ChevronRight, ChevronLeft, FileDown, Eye, EyeOff
+  ChevronRight, ChevronLeft, Printer, Eye, EyeOff
 } from "lucide-react";
 
 const STEPS = [
@@ -46,10 +46,10 @@ export default function HomePage() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  const handleExportPDF = useCallback(async () => {
+  const handleExportPDF = useCallback(() => {
     setExporting(true);
     try {
-      await exportToPDF(cvData, selectedTemplate);
+      exportToPDF(cvData, selectedTemplate);
     } finally {
       setExporting(false);
     }
@@ -75,8 +75,8 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Action bar — mobile only: preview toggle */}
-        <div className="flex justify-between items-center gap-2 mb-4 md:mb-3">
+        {/* Action bar — preview toggle + Save PDF & Print */}
+        <div className="flex justify-end gap-2 mb-4">
           <Button
             variant="outline"
             size="sm"
@@ -87,16 +87,15 @@ export default function HomePage() {
             {showPreview ? <EyeOff className="w-3.5 h-3.5 ml-1" /> : <Eye className="w-3.5 h-3.5 ml-1" />}
             {showPreview ? "إخفاء المعاينة" : "عرض المعاينة"}
           </Button>
-          {/* PDF button visible on desktop in top bar */}
           <Button
             size="sm"
             onClick={handleExportPDF}
             disabled={exporting}
-            className="hidden md:flex text-xs bg-black text-white hover:bg-gray-800 items-center gap-1.5 mr-auto"
-            data-testid="button-save-pdf-desktop"
+            className="text-xs bg-black text-white hover:bg-gray-800"
+            data-testid="button-save-pdf-print"
           >
-            <FileDown className="w-3.5 h-3.5" />
-            {exporting ? "جارٍ التحضير..." : "تصدير PDF"}
+            <Printer className="w-3.5 h-3.5 ml-1" />
+            {exporting ? "جارٍ التحضير..." : "حفظ PDF و طباعة"}
           </Button>
         </div>
 
@@ -138,23 +137,10 @@ export default function HomePage() {
                   className="flex items-center gap-2 bg-black text-white hover:bg-gray-800"
                   data-testid="button-finish-export"
                 >
-                  <FileDown className="w-4 h-4" />
-                  {exporting ? "جارٍ التحضير..." : "تصدير PDF"}
+                  <Printer className="w-4 h-4" />
+                  {exporting ? "جارٍ التحضير..." : "حفظ PDF و طباعة"}
                 </Button>
               )}
-            </div>
-
-            {/* Mobile PDF button — always visible, separated below nav */}
-            <div className="mt-4 md:hidden">
-              <Button
-                onClick={handleExportPDF}
-                disabled={exporting}
-                className="w-full bg-black text-white hover:bg-gray-800 h-12 text-base font-bold flex items-center justify-center gap-2"
-                data-testid="button-save-pdf-mobile"
-              >
-                <FileDown className="w-5 h-5" />
-                {exporting ? "جارٍ تحضير الملف..." : "تصدير PDF للمشاركة"}
-              </Button>
             </div>
 
           </div>
