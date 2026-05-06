@@ -56,9 +56,10 @@ function buildBlocks(cvData: CVData) {
 // ─── Template stylesheets ──────────────────────────────────────────────────────
 const baseCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&display=swap');
+  @page { margin: 0; size: A4; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; color: #111; background: #fff; font-size: 11pt; line-height: 1.5; direction: rtl; }
-  .page { max-width: 210mm; margin: 0 auto; min-height: 297mm; }
+  body { font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; color: #111; background: #fff; font-size: 11pt; line-height: 1.5; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { max-width: 210mm; margin: 0 auto; }
   .entry { margin-bottom: 10px; }
   .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
   .entry-title { font-size: 11pt; font-weight: 700; color: #000; }
@@ -67,7 +68,6 @@ const baseCSS = `
   .entry-desc { font-size: 10pt; color: #333; margin-top: 4px; white-space: pre-line; }
   .summary { font-size: 10.5pt; color: #333; line-height: 1.7; }
   .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-  @media print { body { margin: 0; } @page { margin: 0; size: A4; } }
 `;
 
 function atsCSS() {
@@ -83,7 +83,6 @@ function atsCSS() {
     .section-title { font-size: 10pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #000; white-space: nowrap; }
     .section-line { flex: 1; height: 1.5px; background: #ccc; }
     .skill-tag { background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; padding: 2px 10px; font-size: 9.5pt; color: #222; }
-    @media print { .page { padding: 12mm 14mm; } }
   `;
 }
 
@@ -103,7 +102,6 @@ function modernCSS() {
     .entry-date { background: #f3f3f3; padding: 2px 10px; border-radius: 12px; }
     .skills-grid { padding-right: 10px; }
     .skill-tag { background: #111; color: #fff; border-radius: 4px; padding: 2px 10px; font-size: 9.5pt; }
-    @media print { .page { padding: 12mm 14mm; } }
   `;
 }
 
@@ -120,7 +118,6 @@ function corporateCSS() {
     .section-title { font-size: 11pt; font-weight: 800; color: #000; text-transform: uppercase; letter-spacing: 2px; display: block; padding-bottom: 4px; border-bottom: 2px solid #000; }
     .section-line { display: none; }
     .skill-tag { border: 1.5px solid #111; border-radius: 3px; padding: 2px 10px; font-size: 9.5pt; color: #111; font-weight: 500; }
-    @media print { .header { padding: 14px 12mm; } .body { padding: 4px 12mm 14mm; } }
   `;
 }
 
@@ -140,7 +137,6 @@ function minimalCSS() {
     .entry-date { font-style: italic; color: #999; }
     .entry-desc { line-height: 1.7; color: #555; }
     .skill-tag { background: #f8f8f8; border: 1px solid #e5e5e5; border-radius: 20px; padding: 3px 12px; font-size: 9.5pt; color: #333; }
-    @media print { .page { padding: 16mm 14mm; } }
   `;
 }
 
