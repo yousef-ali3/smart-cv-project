@@ -52,13 +52,24 @@ function buildBlocks(cvData: CVData) {
       </div>
     </div>`).join("");
 
-  return { p, contact, expHTML, eduHTML, skillsHTML, langsHTML, coursesHTML, hasSkills: skills.length > 0, hasLangs: languages.length > 0, hasExp: experience.length > 0, hasEdu: education.length > 0, hasCourses: courses.length > 0 };
+  return {
+    p, contact, expHTML, eduHTML, skillsHTML, langsHTML, coursesHTML,
+    hasSkills: skills.length > 0, hasLangs: languages.length > 0,
+    hasExp: experience.length > 0, hasEdu: education.length > 0, hasCourses: courses.length > 0,
+  };
 }
 
-// ─── Template stylesheets (no Google Fonts import to avoid CORS) ───────────────
+// ─── Base CSS (includes Google Fonts for proper Arabic rendering) ──────────────
+const FONTS_URL = "https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&display=swap";
+
 const baseCSS = `
+  @import url('${FONTS_URL}');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI','Noto Sans Arabic','Arial',sans-serif; color: #111; background: #fff; font-size: 11pt; line-height: 1.5; direction: rtl; }
+  body {
+    font-family: 'Noto Sans Arabic','Segoe UI','Arial',sans-serif;
+    color: #111; background: #fff; font-size: 11pt; line-height: 1.5;
+    direction: rtl; unicode-bidi: embed;
+  }
   .page { max-width: 210mm; margin: 0 auto; }
   .entry { margin-bottom: 10px; }
   .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
@@ -140,7 +151,6 @@ function minimalCSS() {
   `;
 }
 
-// ─── HTML template generators ──────────────────────────────────────────────────
 function section(title: string, content: string) {
   return `<div class="section"><div class="section-header"><span class="section-title">${title}</span><div class="section-line"></div></div>${content}</div>`;
 }
@@ -151,21 +161,20 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
 
   let css: string;
   switch (templateId) {
-    case "modern": css = modernCSS(); break;
+    case "modern":    css = modernCSS(); break;
     case "corporate": css = corporateCSS(); break;
-    case "minimal": css = minimalCSS(); break;
-    default: css = atsCSS();
+    case "minimal":   css = minimalCSS(); break;
+    default:          css = atsCSS();
   }
 
   const sep = templateId === "ats" ? '<span class="sep">|</span>' : "";
   const contactHTML = b.contact.length ? `<div class="contact">${b.contact.join(sep)}</div>` : "";
-
-  const summaryHTML = b.p.summary ? section("الملخص المهني", `<p class="summary">${b.p.summary}</p>`) : "";
-  const expSection = b.hasExp ? section("الخبرات العملية", b.expHTML) : "";
-  const eduSection = b.hasEdu ? section("المؤهلات العلمية", b.eduHTML) : "";
-  const skillsSection = b.hasSkills ? section("المهارات", b.skillsHTML) : "";
-  const langsSection = b.hasLangs ? section("اللغات", b.langsHTML) : "";
-  const coursesSection = b.hasCourses ? section("الدورات والشهادات", b.coursesHTML) : "";
+  const summaryHTML  = b.p.summary   ? section("الملخص المهني",       `<p class="summary">${b.p.summary}</p>`) : "";
+  const expSection   = b.hasExp      ? section("الخبرات العملية",     b.expHTML)    : "";
+  const eduSection   = b.hasEdu      ? section("المؤهلات العلمية",    b.eduHTML)    : "";
+  const skillsSection= b.hasSkills   ? section("المهارات",             b.skillsHTML) : "";
+  const langsSection = b.hasLangs    ? section("اللغات",               b.langsHTML)  : "";
+  const coursesSection=b.hasCourses  ? section("الدورات والشهادات",   b.coursesHTML): "";
 
   const headerInner = `
     <div class="name">${b.p.fullName || ""}</div>
@@ -173,30 +182,17 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
     ${contactHTML}
   `;
 
-  if (templateId === "corporate") {
-    return `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"><style>${css}</style></head>
-<body>
-  <div class="page">
-    <div class="header">${headerInner}</div>
-    <div class="body">
-      ${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}
-    </div>
-  </div>
-</body>
-</html>`;
-  }
+  const body = templateId === "corporate"
+    ? `<div class="page"><div class="header">${headerInner}</div><div class="body">${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}</div></div>`
+    : `<div class="page"><div class="header">${headerInner}</div>${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}</div>`;
 
   return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"><style>${css}</style></head>
-<body>
-  <div class="page">
-    <div class="header">${headerInner}</div>
-    ${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}
-  </div>
-</body>
+<head>
+  <meta charset="UTF-8">
+  <style>${css}</style>
+</head>
+<body>${body}</body>
 </html>`;
 }
 
@@ -208,14 +204,15 @@ export async function exportToPDF(cvData: CVData, templateId: TemplateId = "ats"
     return;
   }
 
-  // Render inside a hidden iframe for proper isolation
+  // Render inside a hidden iframe at A4 width (794px ≈ 210mm @ 96dpi)
+  const CANVAS_WIDTH = 794;
   const iframe = document.createElement("iframe");
   iframe.style.cssText =
-    "position:fixed;top:0;left:-900px;width:794px;height:1122px;border:none;opacity:0;pointer-events:none;z-index:-1;";
+    "position:fixed;top:0;left:-900px;width:794px;height:1200px;border:none;opacity:0;pointer-events:none;z-index:-1;";
   document.body.appendChild(iframe);
 
   try {
-    // Write HTML into the iframe
+    // Write HTML and wait for load
     await new Promise<void>((resolve) => {
       iframe.onload = () => resolve();
       const doc = iframe.contentDocument!;
@@ -224,19 +221,20 @@ export async function exportToPDF(cvData: CVData, templateId: TemplateId = "ats"
       doc.close();
     });
 
-    // Extra wait for layout to settle
-    await new Promise((r) => setTimeout(r, 400));
+    // Wait for fonts (Noto Sans Arabic) to load inside the iframe
+    await iframe.contentDocument!.fonts.ready;
+    // Extra settling time for layout
+    await new Promise((r) => setTimeout(r, 300));
 
     const iframeDoc = iframe.contentDocument!;
     const pageEl = iframeDoc.querySelector<HTMLElement>(".page") || iframeDoc.body;
-
-    // Measure actual content height (no artificial min-height)
     const contentHeight = pageEl.scrollHeight;
+
+    // Resize iframe to full content height so nothing is clipped
     iframe.style.height = `${contentHeight}px`;
     await new Promise((r) => setTimeout(r, 100));
 
-    // Capture at 2× for sharp output — use A4 width (794px = 210mm @ 96dpi)
-    const CANVAS_WIDTH = 794;
+    // Capture at 2× for crisp output
     const canvas = await html2canvas(iframeDoc.body, {
       scale: 2,
       useCORS: true,
@@ -248,36 +246,32 @@ export async function exportToPDF(cvData: CVData, templateId: TemplateId = "ats"
       windowHeight: contentHeight,
     });
 
-    // A4 dimensions
-    const A4_W = 210; // mm
-    const A4_H = 297; // mm
-    // How many mm tall the rendered content is
+    // A4: 210 × 297 mm
+    const A4_W = 210;
+    const A4_H = 297;
     const renderedHeightMM = (canvas.height / canvas.width) * A4_W;
-    // Page height in canvas pixels (2× scale)
-    const pageHeightPx = Math.round((A4_H / A4_W) * canvas.width);
-    // Minimum meaningful slice — ignore trailing blank strips < 8mm
-    const minSlicePx = Math.round((8 / A4_W) * canvas.width);
+    const pageHeightPx     = Math.round((A4_H / A4_W) * canvas.width);
+    // Ignore trailing blank strips shorter than 8 mm
+    const minSlicePx       = Math.round((8 / A4_W) * canvas.width);
 
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    // Clear default metadata
     pdf.setProperties({ title: "", subject: "", author: "", creator: "", keywords: "" });
 
     const imgData = canvas.toDataURL("image/jpeg", 0.97);
 
     if (renderedHeightMM <= A4_H + 2) {
-      // Single page — render at actual height (no empty bottom strip)
+      // Single page — exact content height
       pdf.addImage(imgData, "JPEG", 0, 0, A4_W, Math.min(renderedHeightMM, A4_H));
     } else {
-      // Multi-page — slice canvas into A4-sized chunks
+      // Multi-page
       let yOffset = 0;
       while (yOffset < canvas.height) {
         const remaining = canvas.height - yOffset;
-        // Skip if the remaining slice is too thin (trailing whitespace)
         if (remaining < minSlicePx) break;
         if (yOffset > 0) pdf.addPage();
         const sliceH = Math.min(pageHeightPx, remaining);
         const pageCanvas = document.createElement("canvas");
-        pageCanvas.width = canvas.width;
+        pageCanvas.width  = canvas.width;
         pageCanvas.height = pageHeightPx;
         const ctx = pageCanvas.getContext("2d")!;
         ctx.fillStyle = "#ffffff";
@@ -288,10 +282,21 @@ export async function exportToPDF(cvData: CVData, templateId: TemplateId = "ats"
       }
     }
 
-    const fileName = (cvData.personalInfo.fullName || "سيرتي-الذاتية")
-      .replace(/\s+/g, "-")
-      .replace(/[^\u0600-\u06FF\w-]/g, "");
-    pdf.save(`${fileName || "cv"}.pdf`);
+    // Open as blob URL so the browser shows it directly (native share on mobile)
+    const blob   = pdf.output("blob");
+    const blobUrl = URL.createObjectURL(blob);
+    const link   = window.open(blobUrl, "_blank");
+    if (!link) {
+      // Popup blocked — fall back to direct download
+      const a = document.createElement("a");
+      const name = (cvData.personalInfo.fullName || "سيرتي-الذاتية")
+        .replace(/\s+/g, "-").replace(/[^\u0600-\u06FF\w-]/g, "") || "cv";
+      a.href     = blobUrl;
+      a.download = `${name}.pdf`;
+      a.click();
+    }
+    // Revoke after enough time for the browser to load it
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
   } finally {
     document.body.removeChild(iframe);
   }
