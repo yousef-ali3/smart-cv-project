@@ -46,10 +46,10 @@ export default function HomePage() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  const handleExportPDF = useCallback(() => {
+  const handleExportPDF = useCallback(async () => {
     setExporting(true);
     try {
-      exportToPDF(cvData, selectedTemplate);
+      await exportToPDF(cvData, selectedTemplate);
     } finally {
       setExporting(false);
     }

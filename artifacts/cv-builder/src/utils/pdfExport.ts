@@ -1,3 +1,5 @@
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import type { CVData } from "@/types/cv";
 import type { TemplateId } from "@/context/CVContext";
 
@@ -34,6 +36,7 @@ function buildBlocks(cvData: CVData) {
         </div>
         ${ed.endDate ? `<div class="entry-date">${ed.endDate}</div>` : ""}
       </div>
+      ${ed.description ? `<div class="entry-desc">${ed.description.replace(/\n/g, "<br>")}</div>` : ""}
     </div>`).join("");
 
   const skillsHTML = `<div class="skills-grid">${skills.map(s => `<span class="skill-tag">${s.name}</span>`).join("")}</div>`;
@@ -52,11 +55,10 @@ function buildBlocks(cvData: CVData) {
   return { p, contact, expHTML, eduHTML, skillsHTML, langsHTML, coursesHTML, hasSkills: skills.length > 0, hasLangs: languages.length > 0, hasExp: experience.length > 0, hasEdu: education.length > 0, hasCourses: courses.length > 0 };
 }
 
-// ─── Template stylesheets ──────────────────────────────────────────────────────
+// ─── Template stylesheets (no Google Fonts import to avoid CORS) ───────────────
 const baseCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; color: #111; background: #fff; font-size: 11pt; line-height: 1.5; direction: rtl; }
+  body { font-family: 'Segoe UI','Noto Sans Arabic','Arial',sans-serif; color: #111; background: #fff; font-size: 11pt; line-height: 1.5; direction: rtl; }
   .page { max-width: 210mm; margin: 0 auto; min-height: 297mm; }
   .entry { margin-bottom: 10px; }
   .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
@@ -66,12 +68,11 @@ const baseCSS = `
   .entry-desc { font-size: 10pt; color: #333; margin-top: 4px; white-space: pre-line; }
   .summary { font-size: 10.5pt; color: #333; line-height: 1.7; }
   .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-  @media print { body { margin: 0; } @page { margin: 0; size: A4; } }
 `;
 
 function atsCSS() {
   return baseCSS + `
-    .page { padding: 18mm 16mm; }
+    .page { padding: 14mm 14mm; }
     .header { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #111; padding-bottom: 14px; }
     .name { font-size: 24pt; font-weight: 900; color: #000; letter-spacing: -0.5px; }
     .job-title { font-size: 12pt; font-weight: 600; color: #444; margin-top: 4px; }
@@ -82,13 +83,12 @@ function atsCSS() {
     .section-title { font-size: 10pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #000; white-space: nowrap; }
     .section-line { flex: 1; height: 1.5px; background: #ccc; }
     .skill-tag { background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; padding: 2px 10px; font-size: 9.5pt; color: #222; }
-    @media print { .page { padding: 12mm 14mm; } }
   `;
 }
 
 function modernCSS() {
   return baseCSS + `
-    .page { padding: 18mm 16mm; }
+    .page { padding: 14mm 14mm; }
     .header { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #000; }
     .name { font-size: 26pt; font-weight: 900; color: #000; letter-spacing: -1px; }
     .job-title { font-size: 12pt; font-weight: 600; color: #444; margin-top: 3px; }
@@ -102,30 +102,28 @@ function modernCSS() {
     .entry-date { background: #f3f3f3; padding: 2px 10px; border-radius: 12px; }
     .skills-grid { padding-right: 10px; }
     .skill-tag { background: #111; color: #fff; border-radius: 4px; padding: 2px 10px; font-size: 9.5pt; }
-    @media print { .page { padding: 12mm 14mm; } }
   `;
 }
 
 function corporateCSS() {
   return baseCSS + `
-    .header { background: #111; color: #fff; padding: 18px 16mm; margin-bottom: 4px; }
+    .header { background: #111; color: #fff; padding: 18px 14mm; margin-bottom: 4px; }
     .name { font-size: 26pt; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
     .job-title { font-size: 12pt; color: #ccc; margin-top: 4px; font-weight: 500; }
     .contact { margin-top: 12px; font-size: 9pt; color: #bbb; display: flex; flex-wrap: wrap; gap: 4px 14px; }
     .sep { display: none; }
-    .body { padding: 4px 16mm 18mm; }
+    .body { padding: 4px 14mm 14mm; }
     .section { margin-top: 14px; }
     .section-header { margin-bottom: 8px; }
     .section-title { font-size: 11pt; font-weight: 800; color: #000; text-transform: uppercase; letter-spacing: 2px; display: block; padding-bottom: 4px; border-bottom: 2px solid #000; }
     .section-line { display: none; }
     .skill-tag { border: 1.5px solid #111; border-radius: 3px; padding: 2px 10px; font-size: 9.5pt; color: #111; font-weight: 500; }
-    @media print { .header { padding: 14px 12mm; } .body { padding: 4px 12mm 14mm; } }
   `;
 }
 
 function minimalCSS() {
   return baseCSS + `
-    .page { padding: 22mm 18mm; }
+    .page { padding: 16mm 16mm; }
     .header { margin-bottom: 16px; }
     .name { font-size: 28pt; font-weight: 900; color: #111; letter-spacing: -1.2px; }
     .job-title { font-size: 12pt; color: #777; margin-top: 4px; font-style: italic; }
@@ -139,7 +137,6 @@ function minimalCSS() {
     .entry-date { font-style: italic; color: #999; }
     .entry-desc { line-height: 1.7; color: #555; }
     .skill-tag { background: #f8f8f8; border: 1px solid #e5e5e5; border-radius: 20px; padding: 3px 12px; font-size: 9.5pt; color: #333; }
-    @media print { .page { padding: 16mm 14mm; } }
   `;
 }
 
@@ -160,7 +157,6 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
     default: css = atsCSS();
   }
 
-  // ATS header uses pipe separators; others use spacing
   const sep = templateId === "ats" ? '<span class="sep">|</span>' : "";
   const contactHTML = b.contact.length ? `<div class="contact">${b.contact.join(sep)}</div>` : "";
 
@@ -177,11 +173,10 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
     ${contactHTML}
   `;
 
-  // Corporate has a different page structure (header outside .page padding)
   if (templateId === "corporate") {
     return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"><title>السيرة الذاتية - ${b.p.fullName || ""}</title><style>${css}</style></head>
+<head><meta charset="UTF-8"><style>${css}</style></head>
 <body>
   <div class="page">
     <div class="header">${headerInner}</div>
@@ -195,7 +190,7 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
 
   return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"><title>السيرة الذاتية - ${b.p.fullName || ""}</title><style>${css}</style></head>
+<head><meta charset="UTF-8"><style>${css}</style></head>
 <body>
   <div class="page">
     <div class="header">${headerInner}</div>
@@ -206,35 +201,89 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
 }
 
 // ─── Public API ────────────────────────────────────────────────────────────────
-export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
+export async function exportToPDF(cvData: CVData, templateId: TemplateId = "ats"): Promise<void> {
   const html = buildHTML(cvData, templateId);
   if (!html) {
     alert("الرجاء إدخال بياناتك أولاً قبل الحفظ.");
     return;
   }
 
-  const printWindow = window.open("", "_blank", "width=900,height=700");
-  if (!printWindow) {
-    alert("الرجاء السماح بالنوافذ المنبثقة في المتصفح للتمكن من حفظ PDF.");
-    return;
+  // Render inside a hidden iframe for proper isolation
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText =
+    "position:fixed;top:0;left:-900px;width:794px;height:1122px;border:none;opacity:0;pointer-events:none;z-index:-1;";
+  document.body.appendChild(iframe);
+
+  try {
+    // Write HTML into the iframe
+    await new Promise<void>((resolve) => {
+      iframe.onload = () => resolve();
+      const doc = iframe.contentDocument!;
+      doc.open();
+      doc.write(html);
+      doc.close();
+    });
+
+    // Extra wait for layout to settle
+    await new Promise((r) => setTimeout(r, 400));
+
+    const iframeDoc = iframe.contentDocument!;
+    const pageEl = iframeDoc.querySelector<HTMLElement>(".page") || iframeDoc.body;
+
+    // Measure actual rendered height
+    const fullHeight = Math.max(pageEl.scrollHeight, 1122);
+    iframe.style.height = `${fullHeight}px`;
+    await new Promise((r) => setTimeout(r, 100));
+
+    // Capture canvas at 2× for crisp output
+    const canvas = await html2canvas(iframeDoc.body, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      width: 794,
+      height: fullHeight,
+      windowWidth: 794,
+      windowHeight: fullHeight,
+    });
+
+    // A4 dimensions in mm
+    const A4_W = 210;
+    const A4_H = 297;
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+    const imgData = canvas.toDataURL("image/jpeg", 0.97);
+    const canvasAspect = canvas.height / canvas.width;
+    const renderedHeightMM = A4_W * canvasAspect;
+
+    if (renderedHeightMM <= A4_H) {
+      // Single page
+      pdf.addImage(imgData, "JPEG", 0, 0, A4_W, renderedHeightMM);
+    } else {
+      // Multi-page: slice canvas into A4-sized chunks
+      const pageHeightPx = Math.floor((A4_H / A4_W) * canvas.width);
+      let yOffset = 0;
+
+      while (yOffset < canvas.height) {
+        if (yOffset > 0) pdf.addPage();
+        const sliceH = Math.min(pageHeightPx, canvas.height - yOffset);
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = pageHeightPx;
+        const ctx = pageCanvas.getContext("2d")!;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(canvas, 0, yOffset, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+        pdf.addImage(pageCanvas.toDataURL("image/jpeg", 0.97), "JPEG", 0, 0, A4_W, A4_H);
+        yOffset += pageHeightPx;
+      }
+    }
+
+    const fileName = (cvData.personalInfo.fullName || "سيرتي-الذاتية")
+      .replace(/\s+/g, "-")
+      .replace(/[^\u0600-\u06FF\w-]/g, "");
+    pdf.save(`${fileName || "cv"}.pdf`);
+  } finally {
+    document.body.removeChild(iframe);
   }
-
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-
-  printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-    }, 600);
-  };
-
-  // Fallback in case onload doesn't fire
-  setTimeout(() => {
-    try {
-      printWindow.focus();
-      printWindow.print();
-    } catch (_) {}
-  }, 1500);
 }
