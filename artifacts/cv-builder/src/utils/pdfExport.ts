@@ -59,7 +59,8 @@ const baseCSS = `
   @page { margin: 0; size: A4; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; color: #111; background: #fff; font-size: 11pt; line-height: 1.5; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .page { max-width: 210mm; margin: 0 auto; }
+  .page { max-width: 210mm; margin: 0 auto; min-height: 297mm; box-sizing: border-box; display: flex; flex-direction: column; }
+  .content { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
   .entry { margin-bottom: 10px; }
   .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
   .entry-title { font-size: 11pt; font-weight: 700; color: #000; }
@@ -112,7 +113,7 @@ function corporateCSS() {
     .job-title { font-size: 12pt; color: #ccc; margin-top: 4px; font-weight: 500; }
     .contact { margin-top: 12px; font-size: 9pt; color: #bbb; display: flex; flex-wrap: wrap; gap: 4px 14px; }
     .sep { display: none; }
-    .body { padding: 4px 16mm 18mm; }
+    .body { padding: 4px 16mm 18mm; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
     .section { margin-top: 14px; }
     .section-header { margin-bottom: 8px; }
     .section-title { font-size: 11pt; font-weight: 800; color: #000; text-transform: uppercase; letter-spacing: 2px; display: block; padding-bottom: 4px; border-bottom: 2px solid #000; }
@@ -206,7 +207,7 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
   <div class="page">
     <div class="header">${headerInner}</div>
     <div class="body">
-      ${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}
+      <div class="content">${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}</div>
     </div>
   </div>
 </body>
@@ -219,7 +220,7 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
 <body>
   <div class="page">
     <div class="header">${headerInner}</div>
-    ${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}
+    <div class="content">${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}</div>
   </div>
 </body>
 </html>`;

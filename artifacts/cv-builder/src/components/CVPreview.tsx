@@ -21,7 +21,7 @@ function EmptyState() {
 function ATSTemplate({ d }: { d: CVData }) {
   const { personalInfo: p, education, experience, skills, courses, languages } = d;
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "12mm 14mm", background: "#fff", color: "#1a1a1a" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "12mm 14mm", background: "#fff", color: "#1a1a1a", minHeight: "297mm", boxSizing: "border-box" as const, display: "flex", flexDirection: "column" as const }}>
       <div style={{ textAlign: "center", borderBottom: "2px solid #111", paddingBottom: 14, marginBottom: 4 }}>
         <div style={{ fontSize: 22, fontWeight: 900, color: "#000" }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginTop: 3 }}>{p.jobTitle}</div>}
@@ -33,33 +33,35 @@ function ATSTemplate({ d }: { d: CVData }) {
           {p.website && <span style={{ fontSize: 9.5, color: "#555", display: "flex", alignItems: "center", gap: 3 }}><Globe className="w-2.5 h-2.5" />{p.website}</span>}
         </div>
       </div>
-      {p.summary && <Section title="الملخص المهني"><p style={{ fontSize: 10.5, color: "#444", lineHeight: 1.7 }}>{p.summary}</p></Section>}
-      {experience.length > 0 && <Section title="الخبرات العملية">{experience.map(e => (
-        <div key={e.id} style={{ marginBottom: 8 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.jobTitle}</div><div style={{ fontSize: 10, color: "#555", fontWeight: 600 }}>{e.company}{e.location ? ` · ${e.location}` : ""}</div></div>
-            <div style={{ fontSize: 9.5, color: "#777", whiteSpace: "nowrap" }}>{e.startDate}{(e.startDate || e.endDate) && " – "}{e.current ? "حتى الآن" : e.endDate}</div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" as const, justifyContent: "space-between" }}>
+        {p.summary && <Section title="الملخص المهني"><p style={{ fontSize: 10.5, color: "#444", lineHeight: 1.7 }}>{p.summary}</p></Section>}
+        {experience.length > 0 && <Section title="الخبرات العملية">{experience.map(e => (
+          <div key={e.id} style={{ marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.jobTitle}</div><div style={{ fontSize: 10, color: "#555", fontWeight: 600 }}>{e.company}{e.location ? ` · ${e.location}` : ""}</div></div>
+              <div style={{ fontSize: 9.5, color: "#777", whiteSpace: "nowrap" }}>{e.startDate}{(e.startDate || e.endDate) && " – "}{e.current ? "حتى الآن" : e.endDate}</div>
+            </div>
+            {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
           </div>
-          {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
-        </div>
-      ))}</Section>}
-      {education.length > 0 && <Section title="المؤهلات العلمية">{education.map(e => (
-        <div key={e.id} style={{ marginBottom: 8 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
-            {e.endDate && <div style={{ fontSize: 9.5, color: "#777", whiteSpace: "nowrap" }}>{e.endDate}</div>}
+        ))}</Section>}
+        {education.length > 0 && <Section title="المؤهلات العلمية">{education.map(e => (
+          <div key={e.id} style={{ marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
+              {e.endDate && <div style={{ fontSize: 9.5, color: "#777", whiteSpace: "nowrap" }}>{e.endDate}</div>}
+            </div>
+            {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
           </div>
-          {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
-        </div>
-      ))}</Section>}
-      {skills.length > 0 && <Section title="المهارات"><div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{skills.map(s => <span key={s.id} style={{ fontSize: 9.5, background: "#f0f0f0", border: "1px solid #ddd", borderRadius: 4, padding: "2px 10px" }}>{s.name}</span>)}</div></Section>}
-      {languages.length > 0 && <Section title="اللغات"><div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>{languages.map(l => <span key={l.id} style={{ fontSize: 10 }}><strong>{l.name}</strong>{l.level ? ` · ${l.level}` : ""}</span>)}</div></Section>}
-      {courses.length > 0 && <Section title="الدورات والشهادات">{courses.map(c => (
-        <div key={c.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-          <div><div style={{ fontSize: 10.5, fontWeight: 600 }}>{c.name}</div>{c.provider && <div style={{ fontSize: 9.5, color: "#777" }}>{c.provider}{c.certificateId ? ` · ${c.certificateId}` : ""}</div>}</div>
-          {c.date && <div style={{ fontSize: 9.5, color: "#777" }}>{c.date}</div>}
-        </div>
-      ))}</Section>}
+        ))}</Section>}
+        {skills.length > 0 && <Section title="المهارات"><div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{skills.map(s => <span key={s.id} style={{ fontSize: 9.5, background: "#f0f0f0", border: "1px solid #ddd", borderRadius: 4, padding: "2px 10px" }}>{s.name}</span>)}</div></Section>}
+        {languages.length > 0 && <Section title="اللغات"><div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>{languages.map(l => <span key={l.id} style={{ fontSize: 10 }}><strong>{l.name}</strong>{l.level ? ` · ${l.level}` : ""}</span>)}</div></Section>}
+        {courses.length > 0 && <Section title="الدورات والشهادات">{courses.map(c => (
+          <div key={c.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+            <div><div style={{ fontSize: 10.5, fontWeight: 600 }}>{c.name}</div>{c.provider && <div style={{ fontSize: 9.5, color: "#777" }}>{c.provider}{c.certificateId ? ` · ${c.certificateId}` : ""}</div>}</div>
+            {c.date && <div style={{ fontSize: 9.5, color: "#777" }}>{c.date}</div>}
+          </div>
+        ))}</Section>}
+      </div>
     </div>
   );
 }
@@ -88,7 +90,7 @@ function ModernTemplate({ d }: { d: CVData }) {
     </div>
   );
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "12mm 14mm", background: "#fff", color: "#1a1a1a" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "12mm 14mm", background: "#fff", color: "#1a1a1a", minHeight: "297mm", boxSizing: "border-box" as const, display: "flex", flexDirection: "column" as const }}>
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 24, fontWeight: 900, color: "#000", letterSpacing: -0.5 }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11.5, fontWeight: 600, color: "#444", marginTop: 2 }}>{p.jobTitle}</div>}
@@ -101,33 +103,35 @@ function ModernTemplate({ d }: { d: CVData }) {
         </div>
         <div style={{ height: 2, background: "#000", marginTop: 10 }} />
       </div>
-      {p.summary && sec("الملخص المهني", <p style={{ fontSize: 10.5, color: "#444", lineHeight: 1.7 }}>{p.summary}</p>)}
-      {experience.length > 0 && sec("الخبرات العملية", experience.map(e => (
-        <div key={e.id} style={{ marginBottom: 8, paddingRight: 8 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.jobTitle}</div><div style={{ fontSize: 10, color: "#555" }}>{e.company}{e.location ? ` · ${e.location}` : ""}</div></div>
-            <div style={{ fontSize: 9.5, color: "#777", whiteSpace: "nowrap", background: "#f5f5f5", padding: "2px 8px", borderRadius: 12, alignSelf: "flex-start" }}>{e.startDate}{(e.startDate || e.endDate) && " – "}{e.current ? "حتى الآن" : e.endDate}</div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" as const, justifyContent: "space-between" }}>
+        {p.summary && sec("الملخص المهني", <p style={{ fontSize: 10.5, color: "#444", lineHeight: 1.7 }}>{p.summary}</p>)}
+        {experience.length > 0 && sec("الخبرات العملية", experience.map(e => (
+          <div key={e.id} style={{ marginBottom: 8, paddingRight: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.jobTitle}</div><div style={{ fontSize: 10, color: "#555" }}>{e.company}{e.location ? ` · ${e.location}` : ""}</div></div>
+              <div style={{ fontSize: 9.5, color: "#777", whiteSpace: "nowrap", background: "#f5f5f5", padding: "2px 8px", borderRadius: 12, alignSelf: "flex-start" }}>{e.startDate}{(e.startDate || e.endDate) && " – "}{e.current ? "حتى الآن" : e.endDate}</div>
+            </div>
+            {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
           </div>
-          {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
-        </div>
-      )))}
-      {education.length > 0 && sec("المؤهلات العلمية", education.map(e => (
-        <div key={e.id} style={{ marginBottom: 8, paddingRight: 8 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
-            {e.endDate && <div style={{ fontSize: 9.5, color: "#777", background: "#f5f5f5", padding: "2px 8px", borderRadius: 12, alignSelf: "flex-start" }}>{e.endDate}</div>}
+        )))}
+        {education.length > 0 && sec("المؤهلات العلمية", education.map(e => (
+          <div key={e.id} style={{ marginBottom: 8, paddingRight: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div><div style={{ fontSize: 11, fontWeight: 700 }}>{e.degree}{e.field ? ` في ${e.field}` : ""}</div><div style={{ fontSize: 10, color: "#555" }}>{e.institution}{e.gpa ? ` · المعدل: ${e.gpa}` : ""}</div></div>
+              {e.endDate && <div style={{ fontSize: 9.5, color: "#777", background: "#f5f5f5", padding: "2px 8px", borderRadius: 12, alignSelf: "flex-start" }}>{e.endDate}</div>}
+            </div>
+            {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
           </div>
-          {e.description && <div style={{ fontSize: 10, color: "#444", marginTop: 3, whiteSpace: "pre-line" }}>{e.description}</div>}
-        </div>
-      )))}
-      {skills.length > 0 && sec("المهارات", <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingRight: 8 }}>{skills.map(s => <span key={s.id} style={{ fontSize: 9.5, background: "#111", color: "#fff", borderRadius: 4, padding: "2px 10px" }}>{s.name}</span>)}</div>)}
-      {languages.length > 0 && sec("اللغات", <div style={{ display: "flex", flexWrap: "wrap", gap: 10, paddingRight: 8 }}>{languages.map(l => <span key={l.id} style={{ fontSize: 10 }}><strong>{l.name}</strong>{l.level ? ` · ${l.level}` : ""}</span>)}</div>)}
-      {courses.length > 0 && sec("الدورات والشهادات", courses.map(c => (
-        <div key={c.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, paddingRight: 8 }}>
-          <div><div style={{ fontSize: 10.5, fontWeight: 600 }}>{c.name}</div>{c.provider && <div style={{ fontSize: 9.5, color: "#777" }}>{c.provider}</div>}</div>
-          {c.date && <div style={{ fontSize: 9.5, color: "#777" }}>{c.date}</div>}
-        </div>
-      )))}
+        )))}
+        {skills.length > 0 && sec("المهارات", <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingRight: 8 }}>{skills.map(s => <span key={s.id} style={{ fontSize: 9.5, background: "#111", color: "#fff", borderRadius: 4, padding: "2px 10px" }}>{s.name}</span>)}</div>)}
+        {languages.length > 0 && sec("اللغات", <div style={{ display: "flex", flexWrap: "wrap", gap: 10, paddingRight: 8 }}>{languages.map(l => <span key={l.id} style={{ fontSize: 10 }}><strong>{l.name}</strong>{l.level ? ` · ${l.level}` : ""}</span>)}</div>)}
+        {courses.length > 0 && sec("الدورات والشهادات", courses.map(c => (
+          <div key={c.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, paddingRight: 8 }}>
+            <div><div style={{ fontSize: 10.5, fontWeight: 600 }}>{c.name}</div>{c.provider && <div style={{ fontSize: 9.5, color: "#777" }}>{c.provider}</div>}</div>
+            {c.date && <div style={{ fontSize: 9.5, color: "#777" }}>{c.date}</div>}
+          </div>
+        )))}
+      </div>
     </div>
   );
 }
@@ -142,7 +146,7 @@ function CorporateTemplate({ d }: { d: CVData }) {
     </div>
   );
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", background: "#fff", color: "#1a1a1a" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", background: "#fff", color: "#1a1a1a", minHeight: "297mm", boxSizing: "border-box" as const, display: "flex", flexDirection: "column" as const }}>
       <div style={{ background: "#111", color: "#fff", padding: "16px 14mm", marginBottom: 2 }}>
         <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: -0.5 }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11, color: "#ccc", marginTop: 4, fontWeight: 500 }}>{p.jobTitle}</div>}
@@ -154,7 +158,7 @@ function CorporateTemplate({ d }: { d: CVData }) {
           {p.website && <span style={{ fontSize: 9, color: "#bbb" }}>{p.website}</span>}
         </div>
       </div>
-      <div style={{ padding: "4px 14mm 14mm" }}>
+      <div style={{ padding: "4px 14mm 14mm", flex: 1, display: "flex", flexDirection: "column" as const, justifyContent: "space-between" }}>
         {p.summary && sec("الملخص المهني", <p style={{ fontSize: 10.5, color: "#444", lineHeight: 1.7 }}>{p.summary}</p>)}
         {experience.length > 0 && sec("الخبرات العملية", experience.map(e => (
           <div key={e.id} style={{ marginBottom: 10 }}>
@@ -200,7 +204,7 @@ function MinimalTemplate({ d }: { d: CVData }) {
     </div>
   );
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "14mm 16mm", background: "#fff", color: "#1a1a1a" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "14mm 16mm", background: "#fff", color: "#1a1a1a", minHeight: "297mm", boxSizing: "border-box" as const, display: "flex", flexDirection: "column" as const }}>
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 26, fontWeight: 900, color: "#111", letterSpacing: -1 }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11, color: "#777", marginTop: 3, fontStyle: "italic" }}>{p.jobTitle}</div>}
