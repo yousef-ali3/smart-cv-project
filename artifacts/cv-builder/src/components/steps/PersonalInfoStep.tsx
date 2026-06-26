@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useCVContext, CvLanguage } from "@/context/CVContext";
 import { PersonalInfo } from "@/types/cv";
 import {
@@ -61,15 +61,19 @@ export default function PersonalInfoStep() {
     },
   });
 
+  // Keep a ref to the latest personalInfo to avoid stale-closure overwriting English fields
+  const personalInfoRef = useRef(cvData.personalInfo);
+  personalInfoRef.current = cvData.personalInfo;
+
   useEffect(() => {
     const subscription = form.watch((values) => {
-      updateCVData({ personalInfo: { ...cvData.personalInfo, ...(values as PersonalInfo) } });
+      updateCVData({ personalInfo: { ...personalInfoRef.current, ...(values as PersonalInfo) } });
     });
     return () => subscription.unsubscribe();
   }, [form, updateCVData]);
 
   const updateEnField = (field: Partial<PersonalInfo>) => {
-    updateCVData({ personalInfo: { ...cvData.personalInfo, ...field } });
+    updateCVData({ personalInfo: { ...personalInfoRef.current, ...field } });
   };
 
   return (

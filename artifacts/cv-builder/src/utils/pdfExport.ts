@@ -250,9 +250,9 @@ function buildBilingualHTML(cvData: CVData): string {
     </div>`;
 
   const contactItems = [
-    p.email && `✉ ${p.email}`,
-    p.phone && `☎ ${p.phone}`,
-    p.location && `📍 ${p.location}`,
+    p.email && p.email,
+    p.phone && p.phone,
+    p.location && p.location,
   ].filter(Boolean);
 
   const contactBar = contactItems.length
