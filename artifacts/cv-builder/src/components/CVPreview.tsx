@@ -278,11 +278,11 @@ function BilingualTemplate({ d }: { d: CVData }) {
     ));
 
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", background: "#fff", color: "#1a1a1a", padding: "14mm 14mm" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", background: "#fff", color: "#1a1a1a", padding: "14mm 14mm", minHeight: "297mm", boxSizing: "border-box" as const, display: "flex", flexDirection: "column" as const }}>
       {/* Header — names */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", paddingBottom: 6, marginBottom: 2 }}>
         <div style={{ fontSize: 20, fontWeight: 900, direction: "ltr" as const, fontFamily: enFont, letterSpacing: -0.5 }}>
-          {p.fullNameEn || "Full Name"}
+          {p.fullNameEn}
         </div>
         <div style={{ fontSize: 20, fontWeight: 900, direction: "rtl" as const }}>
           {p.fullName}
@@ -298,90 +298,93 @@ function BilingualTemplate({ d }: { d: CVData }) {
         </div>
       )}
 
-      {/* Career Objective */}
-      {(p.summary || p.summaryEn) && (
-        <BiSection
-          arTitle="الهدف الوظيفي" enTitle="CAREER OBJECTIVE"
-          arContent={<p style={{ fontSize: 9.5, lineHeight: 1.75, color: "#333" }}>{p.summary}</p>}
-          enContent={<p style={{ fontSize: 9.5, lineHeight: 1.75, color: "#333" }}>{p.summaryEn || ""}</p>}
-        />
-      )}
+      {/* Sections — flex:1 to fill remaining page height */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" as const, justifyContent: "space-between" }}>
+        {/* Career Objective */}
+        {(p.summary || p.summaryEn) && (
+          <BiSection
+            arTitle="الهدف الوظيفي" enTitle="CAREER OBJECTIVE"
+            arContent={<p style={{ fontSize: 9.5, lineHeight: 1.75, color: "#333" }}>{p.summary}</p>}
+            enContent={<p style={{ fontSize: 9.5, lineHeight: 1.75, color: "#333" }}>{p.summaryEn || ""}</p>}
+          />
+        )}
 
-      {/* Education */}
-      {education.length > 0 && (
-        <BiSection
-          arTitle="التعليم" enTitle="EDUCATION"
-          arContent={<div>{education.map(e => (
-            <div key={e.id} style={{ marginBottom: 8 }}>
-              {e.degree && <div style={{ fontSize: 9.5 }}><strong>المؤهل:</strong> {e.degree}</div>}
-              {e.field && <div style={{ fontSize: 9.5 }}><strong>التخصص:</strong> {e.field}</div>}
-              {e.institution && <div style={{ fontSize: 9.5 }}><strong>جهة التعليم:</strong> {e.institution}</div>}
-              {e.endDate && <div style={{ fontSize: 9, color: "#666" }}>{e.endDate}</div>}
-            </div>
-          ))}</div>}
-          enContent={<div>{education.map(e => (
-            <div key={e.id} style={{ marginBottom: 8 }}>
-              {(e.degreeEn || e.degree) && <div style={{ fontSize: 9.5 }}><strong>Degree:</strong> {e.degreeEn || e.degree}</div>}
-              {(e.fieldEn || e.field) && <div style={{ fontSize: 9.5 }}><strong>Major:</strong> {e.fieldEn || e.field}</div>}
-              {(e.institutionEn || e.institution) && <div style={{ fontSize: 9.5 }}><strong>Institution:</strong> {e.institutionEn || e.institution}</div>}
-              {e.endDate && <div style={{ fontSize: 9, color: "#666" }}>{e.endDate}</div>}
-            </div>
-          ))}</div>}
-        />
-      )}
+        {/* Education */}
+        {education.length > 0 && (
+          <BiSection
+            arTitle="التعليم" enTitle="EDUCATION"
+            arContent={<div>{education.map(e => (
+              <div key={e.id} style={{ marginBottom: 8 }}>
+                {e.degree && <div style={{ fontSize: 9.5 }}><strong>المؤهل:</strong> {e.degree}</div>}
+                {e.field && <div style={{ fontSize: 9.5 }}><strong>التخصص:</strong> {e.field}</div>}
+                {e.institution && <div style={{ fontSize: 9.5 }}><strong>جهة التعليم:</strong> {e.institution}</div>}
+                {e.endDate && <div style={{ fontSize: 9, color: "#666" }}>{e.endDate}</div>}
+              </div>
+            ))}</div>}
+            enContent={<div>{education.map(e => (
+              <div key={e.id} style={{ marginBottom: 8 }}>
+                {(e.degreeEn || e.degree) && <div style={{ fontSize: 9.5 }}><strong>Degree:</strong> {e.degreeEn || e.degree}</div>}
+                {(e.fieldEn || e.field) && <div style={{ fontSize: 9.5 }}><strong>Major:</strong> {e.fieldEn || e.field}</div>}
+                {(e.institutionEn || e.institution) && <div style={{ fontSize: 9.5 }}><strong>Institution:</strong> {e.institutionEn || e.institution}</div>}
+                {e.endDate && <div style={{ fontSize: 9, color: "#666" }}>{e.endDate}</div>}
+              </div>
+            ))}</div>}
+          />
+        )}
 
-      {/* Experience */}
-      {experience.length > 0 && (
-        <BiSection
-          arTitle="الخبرات" enTitle="EXPERIENCE"
-          arContent={<div>{experience.map(e => (
-            <div key={e.id} style={{ marginBottom: 6 }}>
-              {e.jobTitle && <div style={{ fontSize: 9.5, fontWeight: 700 }}>{e.jobTitle}{e.company ? ` · ${e.company}` : ""}</div>}
-              {e.description && bulletLines(e.description)}
-            </div>
-          ))}</div>}
-          enContent={<div>{experience.map(e => (
-            <div key={e.id} style={{ marginBottom: 6 }}>
-              {(e.jobTitleEn || e.jobTitle) && <div style={{ fontSize: 9.5, fontWeight: 700 }}>{e.jobTitleEn || e.jobTitle}{(e.companyEn || e.company) ? ` · ${e.companyEn || e.company}` : ""}</div>}
-              {(e.descriptionEn || e.description) && bulletLines(e.descriptionEn || e.description)}
-            </div>
-          ))}</div>}
-        />
-      )}
+        {/* Experience */}
+        {experience.length > 0 && (
+          <BiSection
+            arTitle="الخبرات" enTitle="EXPERIENCE"
+            arContent={<div>{experience.map(e => (
+              <div key={e.id} style={{ marginBottom: 6 }}>
+                {e.jobTitle && <div style={{ fontSize: 9.5, fontWeight: 700 }}>{e.jobTitle}{e.company ? ` · ${e.company}` : ""}</div>}
+                {e.description && bulletLines(e.description)}
+              </div>
+            ))}</div>}
+            enContent={<div>{experience.map(e => (
+              <div key={e.id} style={{ marginBottom: 6 }}>
+                {(e.jobTitleEn || e.jobTitle) && <div style={{ fontSize: 9.5, fontWeight: 700 }}>{e.jobTitleEn || e.jobTitle}{(e.companyEn || e.company) ? ` · ${e.companyEn || e.company}` : ""}</div>}
+                {(e.descriptionEn || e.description) && bulletLines(e.descriptionEn || e.description)}
+              </div>
+            ))}</div>}
+          />
+        )}
 
-      {/* Courses */}
-      {courses.length > 0 && (
-        <BiSection
-          arTitle="الدورات" enTitle="COURSES"
-          arContent={<div>{courses.map(c => (
-            <div key={c.id} style={{ fontSize: 9.5, display: "flex", gap: 5, marginBottom: 2 }}>
-              <span>–</span><span>{c.name}</span>
-            </div>
-          ))}</div>}
-          enContent={<div>{courses.map(c => (
-            <div key={c.id} style={{ fontSize: 9.5, display: "flex", gap: 5, marginBottom: 2 }}>
-              <span>–</span><span>{c.nameEn || c.name}</span>
-            </div>
-          ))}</div>}
-        />
-      )}
+        {/* Courses */}
+        {courses.length > 0 && (
+          <BiSection
+            arTitle="الدورات" enTitle="COURSES"
+            arContent={<div>{courses.map(c => (
+              <div key={c.id} style={{ fontSize: 9.5, display: "flex", gap: 5, marginBottom: 2 }}>
+                <span>–</span><span>{c.name}</span>
+              </div>
+            ))}</div>}
+            enContent={<div>{courses.map(c => (
+              <div key={c.id} style={{ fontSize: 9.5, display: "flex", gap: 5, marginBottom: 2 }}>
+                <span>–</span><span>{c.nameEn || c.name}</span>
+              </div>
+            ))}</div>}
+          />
+        )}
 
-      {/* Skills */}
-      {skills.length > 0 && (
-        <BiSection
-          arTitle="المهارات" enTitle="SKILLS"
-          arContent={<div>{skills.map(s => (
-            <div key={s.id} style={{ fontSize: 9.5, display: "flex", gap: 5, marginBottom: 2 }}>
-              <span>–</span><span>{s.name}</span>
-            </div>
-          ))}</div>}
-          enContent={<div>{skills.map(s => (
-            <div key={s.id} style={{ fontSize: 9.5, display: "flex", gap: 5, marginBottom: 2 }}>
-              <span>–</span><span>{s.nameEn || s.name}</span>
-            </div>
-          ))}</div>}
-        />
-      )}
+        {/* Skills */}
+        {skills.length > 0 && (
+          <BiSection
+            arTitle="المهارات" enTitle="SKILLS"
+            arContent={<div>{skills.map(s => (
+              <div key={s.id} style={{ fontSize: 9.5, display: "flex", gap: 5, marginBottom: 2 }}>
+                <span>–</span><span>{s.name}</span>
+              </div>
+            ))}</div>}
+            enContent={<div>{skills.map(s => (
+              <div key={s.id} style={{ fontSize: 9.5, display: "flex", gap: 5, marginBottom: 2 }}>
+                <span>–</span><span>{s.nameEn || s.name}</span>
+              </div>
+            ))}</div>}
+          />
+        )}
+      </div>
     </div>
   );
 }

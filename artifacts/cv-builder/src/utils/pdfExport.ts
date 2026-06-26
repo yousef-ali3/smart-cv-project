@@ -143,12 +143,13 @@ function minimalCSS() {
 function bilingualCSS() {
   return baseCSS + `
     body { direction: ltr; }
-    .page { padding: 14mm 14mm; }
+    .page { padding: 14mm 14mm; min-height: 297mm; box-sizing: border-box; display: flex; flex-direction: column; }
     .bil-header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 6px; margin-bottom: 2px; }
     .bil-name-en { font-size: 22pt; font-weight: 900; direction: ltr; font-family: Arial,'Times New Roman',serif; letter-spacing: -0.5px; }
     .bil-name-ar { font-size: 22pt; font-weight: 900; direction: rtl; font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; }
     .bil-contact { background: #e0e0e0; padding: 5px 12px; display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 2px; font-size: 9pt; direction: ltr; }
-    .bil-section { margin-top: 14px; }
+    .bil-content { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .bil-section { margin-top: 10px; }
     .bil-sec-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1.5px solid #888; padding-bottom: 3px; margin-bottom: 8px; }
     .bil-sec-en { font-size: 10pt; font-weight: 800; letter-spacing: 1.5px; direction: ltr; font-family: Arial,serif; }
     .bil-sec-ar { font-size: 10pt; font-weight: 800; direction: rtl; font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; }
@@ -321,15 +322,17 @@ function buildBilingualHTML(cvData: CVData): string {
 <body>
   <div class="page">
     <div class="bil-header">
-      <div class="bil-name-en">${p.fullNameEn || "Full Name"}</div>
+      <div class="bil-name-en">${p.fullNameEn || ""}</div>
       <div class="bil-name-ar">${p.fullName || ""}</div>
     </div>
     ${contactBar}
-    ${summarySection}
-    ${eduSection}
-    ${expSection}
-    ${coursesSection}
-    ${skillsSection}
+    <div class="bil-content">
+      ${summarySection}
+      ${eduSection}
+      ${expSection}
+      ${coursesSection}
+      ${skillsSection}
+    </div>
   </div>
 </body>
 </html>`;
