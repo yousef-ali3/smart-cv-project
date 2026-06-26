@@ -124,10 +124,10 @@ export default function PersonalInfoStep() {
             control={form.control}
             name="fullName"
             render={({ field }) => (
-              <FormItem className={isBilingual ? "" : "sm:col-span-2"}>
+              <FormItem className="sm:col-span-2">
                 <FormLabel className="flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  الاسم الكامل *
+                  {isBilingual ? "الاسم الكامل (عربي) *" : "الاسم الكامل *"}
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -141,9 +141,9 @@ export default function PersonalInfoStep() {
             )}
           />
 
-          {/* English name — only when bilingual */}
+          {/* English name — only when bilingual, full width row */}
           {isBilingual && (
-            <div className="space-y-1">
+            <div className="space-y-1 sm:col-span-2">
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <User className="w-4 h-4" />
                 Full Name (English)

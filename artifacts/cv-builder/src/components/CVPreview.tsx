@@ -21,7 +21,7 @@ function EmptyState() {
 function ATSTemplate({ d }: { d: CVData }) {
   const { personalInfo: p, education, experience, skills, courses, languages } = d;
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", minHeight: "297mm", padding: "12mm 14mm", background: "#fff", color: "#1a1a1a" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "12mm 14mm", background: "#fff", color: "#1a1a1a" }}>
       <div style={{ textAlign: "center", borderBottom: "2px solid #111", paddingBottom: 14, marginBottom: 4 }}>
         <div style={{ fontSize: 22, fontWeight: 900, color: "#000" }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11, fontWeight: 600, color: "#555", marginTop: 3 }}>{p.jobTitle}</div>}
@@ -88,7 +88,7 @@ function ModernTemplate({ d }: { d: CVData }) {
     </div>
   );
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", minHeight: "297mm", padding: "12mm 14mm", background: "#fff", color: "#1a1a1a" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "12mm 14mm", background: "#fff", color: "#1a1a1a" }}>
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 24, fontWeight: 900, color: "#000", letterSpacing: -0.5 }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11.5, fontWeight: 600, color: "#444", marginTop: 2 }}>{p.jobTitle}</div>}
@@ -142,7 +142,7 @@ function CorporateTemplate({ d }: { d: CVData }) {
     </div>
   );
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", minHeight: "297mm", background: "#fff", color: "#1a1a1a" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", background: "#fff", color: "#1a1a1a" }}>
       <div style={{ background: "#111", color: "#fff", padding: "16px 14mm", marginBottom: 2 }}>
         <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: -0.5 }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11, color: "#ccc", marginTop: 4, fontWeight: 500 }}>{p.jobTitle}</div>}
@@ -200,7 +200,7 @@ function MinimalTemplate({ d }: { d: CVData }) {
     </div>
   );
   return (
-    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", minHeight: "297mm", padding: "14mm 16mm", background: "#fff", color: "#1a1a1a" }}>
+    <div id="cv-preview" style={{ fontFamily: "'Segoe UI','Noto Sans Arabic',Arial,sans-serif", direction: "rtl", padding: "14mm 16mm", background: "#fff", color: "#1a1a1a" }}>
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 26, fontWeight: 900, color: "#111", letterSpacing: -1 }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11, color: "#777", marginTop: 3, fontStyle: "italic" }}>{p.jobTitle}</div>}
