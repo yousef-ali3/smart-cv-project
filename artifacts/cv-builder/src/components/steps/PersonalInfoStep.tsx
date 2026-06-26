@@ -147,6 +147,7 @@ export default function PersonalInfoStep() {
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <User className="w-4 h-4" />
                 Full Name (English)
+                <span className="text-xs text-muted-foreground font-normal">— الاسم بالإنجليزية</span>
               </Label>
               <Input
                 placeholder="First Last"
@@ -315,7 +316,10 @@ export default function PersonalInfoStep() {
             <div className="h-px flex-1 bg-border" />
           </div>
           <div className="space-y-1">
-            <Label className="text-sm font-medium">Career Objective (English)</Label>
+            <Label className="text-sm font-medium">
+              Career Objective (English)
+              <span className="text-xs text-muted-foreground font-normal mr-2">— الهدف الوظيفي بالإنجليزية</span>
+            </Label>
             <Textarea
               placeholder="I aspire to join your esteemed organization to contribute my knowledge and professional services..."
               dir="ltr"

@@ -125,7 +125,7 @@ function EducationCard({
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">English Fields</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">Degree</Label>
+                  <Label className="text-xs">Degree <span className="text-muted-foreground font-normal">— الدرجة العلمية</span></Label>
                   <Input
                     placeholder="Bachelor's, Master's..."
                     dir="ltr"
@@ -134,7 +134,7 @@ function EducationCard({
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">Major / Field</Label>
+                  <Label className="text-xs">Major / Field <span className="text-muted-foreground font-normal">— التخصص</span></Label>
                   <Input
                     placeholder="Computer Science, Business..."
                     dir="ltr"
@@ -143,7 +143,7 @@ function EducationCard({
                   />
                 </div>
                 <div className="sm:col-span-2 space-y-1">
-                  <Label className="text-xs">Institution</Label>
+                  <Label className="text-xs">Institution <span className="text-muted-foreground font-normal">— جهة التعليم</span></Label>
                   <Input
                     placeholder="King Saud University"
                     dir="ltr"

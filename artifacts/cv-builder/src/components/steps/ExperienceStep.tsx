@@ -140,7 +140,7 @@ function ExperienceCard({
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">English Fields</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">Job Title</Label>
+                  <Label className="text-xs">Job Title <span className="text-muted-foreground font-normal">— المسمى الوظيفي</span></Label>
                   <Input
                     placeholder="Senior Software Engineer"
                     dir="ltr"
@@ -149,7 +149,7 @@ function ExperienceCard({
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">Company</Label>
+                  <Label className="text-xs">Company <span className="text-muted-foreground font-normal">— الشركة</span></Label>
                   <Input
                     placeholder="Saudi Aramco"
                     dir="ltr"
@@ -159,7 +159,7 @@ function ExperienceCard({
                 </div>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Responsibilities & Achievements</Label>
+                <Label className="text-xs">Responsibilities & Achievements <span className="text-muted-foreground font-normal">— المهام والإنجازات</span></Label>
                 <Textarea
                   placeholder={`– Experience in marketing for 2 years\n– Experience in sales supervision for 1 year`}
                   className="min-h-[100px] resize-none text-sm"

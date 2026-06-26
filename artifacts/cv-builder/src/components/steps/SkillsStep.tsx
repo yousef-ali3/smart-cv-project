@@ -245,7 +245,7 @@ export default function SkillsStep() {
               {/* English course name — bilingual only */}
               {isBilingual && (
                 <div className="border-t pt-2 space-y-1">
-                  <Label className="text-xs text-muted-foreground">Course Name (English)</Label>
+                  <Label className="text-xs">Course Name (English) <span className="text-muted-foreground font-normal">— اسم الدورة بالإنجليزية</span></Label>
                   <Input
                     placeholder="Cybersecurity, Fundamentals of Managing Tourism Events..."
                     dir="ltr"

@@ -93,11 +93,11 @@ function ModernTemplate({ d }: { d: CVData }) {
         <div style={{ fontSize: 24, fontWeight: 900, color: "#000", letterSpacing: -0.5 }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11.5, fontWeight: 600, color: "#444", marginTop: 2 }}>{p.jobTitle}</div>}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 14px", marginTop: 6 }}>
-          {p.email && <span style={{ fontSize: 9.5, color: "#555" }}>✉ {p.email}</span>}
-          {p.phone && <span style={{ fontSize: 9.5, color: "#555" }}>📞 {p.phone}</span>}
-          {p.location && <span style={{ fontSize: 9.5, color: "#555" }}>📍 {p.location}</span>}
-          {p.linkedin && <span style={{ fontSize: 9.5, color: "#555" }}>🔗 {p.linkedin}</span>}
-          {p.website && <span style={{ fontSize: 9.5, color: "#555" }}>🌐 {p.website}</span>}
+          {p.email && <span style={{ fontSize: 9.5, color: "#555" }}>{p.email}</span>}
+          {p.phone && <span style={{ fontSize: 9.5, color: "#555" }}>{p.phone}</span>}
+          {p.location && <span style={{ fontSize: 9.5, color: "#555" }}>{p.location}</span>}
+          {p.linkedin && <span style={{ fontSize: 9.5, color: "#555" }}>{p.linkedin}</span>}
+          {p.website && <span style={{ fontSize: 9.5, color: "#555" }}>{p.website}</span>}
         </div>
         <div style={{ height: 2, background: "#000", marginTop: 10 }} />
       </div>
@@ -147,11 +147,11 @@ function CorporateTemplate({ d }: { d: CVData }) {
         <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: -0.5 }}>{p.fullName}</div>
         {p.jobTitle && <div style={{ fontSize: 11, color: "#ccc", marginTop: 4, fontWeight: 500 }}>{p.jobTitle}</div>}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", marginTop: 10 }}>
-          {p.email && <span style={{ fontSize: 9, color: "#bbb" }}>✉ {p.email}</span>}
-          {p.phone && <span style={{ fontSize: 9, color: "#bbb" }}>📞 {p.phone}</span>}
-          {p.location && <span style={{ fontSize: 9, color: "#bbb" }}>📍 {p.location}</span>}
-          {p.linkedin && <span style={{ fontSize: 9, color: "#bbb" }}>🔗 {p.linkedin}</span>}
-          {p.website && <span style={{ fontSize: 9, color: "#bbb" }}>🌐 {p.website}</span>}
+          {p.email && <span style={{ fontSize: 9, color: "#bbb" }}>{p.email}</span>}
+          {p.phone && <span style={{ fontSize: 9, color: "#bbb" }}>{p.phone}</span>}
+          {p.location && <span style={{ fontSize: 9, color: "#bbb" }}>{p.location}</span>}
+          {p.linkedin && <span style={{ fontSize: 9, color: "#bbb" }}>{p.linkedin}</span>}
+          {p.website && <span style={{ fontSize: 9, color: "#bbb" }}>{p.website}</span>}
         </div>
       </div>
       <div style={{ padding: "4px 14mm 14mm" }}>
@@ -292,9 +292,9 @@ function BilingualTemplate({ d }: { d: CVData }) {
       {/* Contact bar */}
       {(p.email || p.phone || p.location) && (
         <div style={{ background: "#e0e0e0", padding: "5px 12px", display: "flex", justifyContent: "center", alignItems: "center", gap: 20, marginBottom: 2 }}>
-          {p.email && <span style={{ fontSize: 9, direction: "ltr" as const, fontFamily: enFont }}>✉ {p.email}</span>}
-          {p.phone && <span style={{ fontSize: 9, direction: "ltr" as const, fontFamily: enFont }}>☎ {p.phone}</span>}
-          {p.location && <span style={{ fontSize: 9, direction: "ltr" as const, fontFamily: enFont }}>📍 {p.location}</span>}
+          {p.email && <span style={{ fontSize: 9, direction: "ltr" as const, fontFamily: enFont }}>{p.email}</span>}
+          {p.phone && <span style={{ fontSize: 9, direction: "ltr" as const, fontFamily: enFont }}>{p.phone}</span>}
+          {p.location && <span style={{ fontSize: 9, direction: "ltr" as const, fontFamily: enFont }}>{p.location}</span>}
         </div>
       )}
 
