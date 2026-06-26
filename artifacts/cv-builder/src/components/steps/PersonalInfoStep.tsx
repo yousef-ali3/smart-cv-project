@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect } from "react";
-import { useCVContext } from "@/context/CVContext";
+import { useCVContext, CvLanguage } from "@/context/CVContext";
 import { PersonalInfo } from "@/types/cv";
 import {
   Form,
@@ -44,7 +44,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function PersonalInfoStep() {
-  const { cvData, updateCVData, cvLanguage } = useCVContext();
+  const { cvData, updateCVData, cvLanguage, setCvLanguage, selectedTemplate, setSelectedTemplate } = useCVContext();
   const isBilingual = cvLanguage === "bilingual";
 
   const form = useForm<FormValues>({
@@ -81,6 +81,41 @@ export default function PersonalInfoStep() {
         <p className="text-sm text-muted-foreground">
           أدخل بياناتك الشخصية الأساسية
         </p>
+      </div>
+
+      {/* Language selector — first thing the user sees */}
+      <div className="rounded-xl border border-border p-4 bg-muted/30 space-y-3">
+        <p className="text-sm font-semibold text-foreground">لغة السيرة الذاتية</p>
+        <div className="grid grid-cols-2 gap-3">
+          {(["ar", "bilingual"] as CvLanguage[]).map((lang) => {
+            const isSelected = cvLanguage === lang;
+            return (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => {
+                  setCvLanguage(lang);
+                  if (lang === "bilingual" && selectedTemplate !== "bilingual") {
+                    setSelectedTemplate("bilingual");
+                  } else if (lang === "ar" && selectedTemplate === "bilingual") {
+                    setSelectedTemplate("ats");
+                  }
+                }}
+                className={`rounded-xl border-2 p-3 text-center transition-all cursor-pointer ${
+                  isSelected
+                    ? "border-black bg-black text-white"
+                    : "border-border hover:border-gray-400 bg-white text-foreground"
+                }`}
+              >
+                <div className="text-lg mb-0.5">{lang === "ar" ? "🇸🇦" : "🌐"}</div>
+                <div className="font-bold text-sm">{lang === "ar" ? "عربي فقط" : "عربي + إنجليزي"}</div>
+                <div className={`text-xs mt-0.5 ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>
+                  {lang === "ar" ? "Arabic only" : "Bilingual"}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <Form {...form}>

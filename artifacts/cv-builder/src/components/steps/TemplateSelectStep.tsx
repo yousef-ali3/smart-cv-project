@@ -1,4 +1,4 @@
-import { useCVContext, TemplateId, CvLanguage } from "@/context/CVContext";
+import { useCVContext, TemplateId } from "@/context/CVContext";
 import { Check } from "lucide-react";
 
 const arOnlyTemplates: {
@@ -185,16 +185,7 @@ const bilingualTemplate = {
 };
 
 export default function TemplateSelectStep() {
-  const { selectedTemplate, setSelectedTemplate, cvLanguage, setCvLanguage } = useCVContext();
-
-  const handleLanguageChange = (lang: CvLanguage) => {
-    setCvLanguage(lang);
-    if (lang === "bilingual") {
-      setSelectedTemplate("bilingual");
-    } else if (selectedTemplate === "bilingual") {
-      setSelectedTemplate("ats");
-    }
-  };
+  const { selectedTemplate, setSelectedTemplate, cvLanguage } = useCVContext();
 
   const templates = cvLanguage === "bilingual"
     ? [bilingualTemplate]
@@ -204,39 +195,18 @@ export default function TemplateSelectStep() {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-foreground mb-1">اختيار القالب</h2>
-        <p className="text-sm text-muted-foreground">اختر لغة السيرة الذاتية والقالب المناسب</p>
+        <p className="text-sm text-muted-foreground">اختر القالب الذي يناسبك — المعاينة تتحدث فوراً</p>
       </div>
 
-      {/* Language selector */}
-      <div>
-        <p className="text-sm font-semibold text-foreground mb-2">لغة السيرة الذاتية</p>
-        <div className="grid grid-cols-2 gap-3">
-          {(["ar", "bilingual"] as CvLanguage[]).map((lang) => {
-            const isSelected = cvLanguage === lang;
-            return (
-              <button
-                key={lang}
-                onClick={() => handleLanguageChange(lang)}
-                className={`rounded-xl border-2 p-3 text-center transition-all cursor-pointer ${
-                  isSelected ? "border-black bg-black text-white" : "border-border hover:border-gray-400 bg-white text-foreground"
-                }`}
-              >
-                <div className="text-lg mb-0.5">{lang === "ar" ? "🇸🇦" : "🌐"}</div>
-                <div className="font-bold text-sm">{lang === "ar" ? "عربي فقط" : "عربي + إنجليزي"}</div>
-                <div className={`text-xs mt-0.5 ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>
-                  {lang === "ar" ? "Arabic only" : "Bilingual"}
-                </div>
-              </button>
-            );
-          })}
+      {cvLanguage === "bilingual" && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
+          <span>🌐</span>
+          <span>تم اختيار اللغتين العربية والإنجليزية — القالب الثنائي متاح فقط</span>
         </div>
-      </div>
+      )}
 
-      {/* Template grid */}
-      <div>
-        <p className="text-sm font-semibold text-foreground mb-2">القالب</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {templates.map((t) => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {templates.map((t) => {
             const isSelected = selectedTemplate === t.id;
             return (
               <div
@@ -277,7 +247,6 @@ export default function TemplateSelectStep() {
             );
           })}
         </div>
-      </div>
     </div>
   );
 }
