@@ -15,11 +15,13 @@ function generateId() {
 function ExperienceCard({
   exp,
   index,
+  isBilingual,
   onUpdate,
   onDelete,
 }: {
   exp: Experience;
   index: number;
+  isBilingual: boolean;
   onUpdate: (id: string, data: Partial<Experience>) => void;
   onDelete: (id: string) => void;
 }) {
@@ -124,15 +126,50 @@ function ExperienceCard({
           <div className="space-y-1">
             <Label className="text-xs">المهام والإنجازات</Label>
             <Textarea
-              placeholder={`• قيادة فريق تقني من 5 مطورين
-• تطوير منصة إلكترونية زادت المبيعات بنسبة 30%
-• تحسين أداء قاعدة البيانات بنسبة 40%`}
+              placeholder={`• قيادة فريق تقني من 5 مطورين\n• تطوير منصة إلكترونية زادت المبيعات بنسبة 30%\n• تحسين أداء قاعدة البيانات بنسبة 40%`}
               className="min-h-[100px] resize-none text-sm"
               value={exp.description}
               onChange={(e) => onUpdate(exp.id, { description: e.target.value })}
               data-testid={`textarea-exp-desc-${exp.id}`}
             />
           </div>
+
+          {/* English fields — bilingual only */}
+          {isBilingual && (
+            <div className="border-t pt-3 space-y-3">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">English Fields</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Job Title</Label>
+                  <Input
+                    placeholder="Senior Software Engineer"
+                    dir="ltr"
+                    value={exp.jobTitleEn || ""}
+                    onChange={(e) => onUpdate(exp.id, { jobTitleEn: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Company</Label>
+                  <Input
+                    placeholder="Saudi Aramco"
+                    dir="ltr"
+                    value={exp.companyEn || ""}
+                    onChange={(e) => onUpdate(exp.id, { companyEn: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Responsibilities & Achievements</Label>
+                <Textarea
+                  placeholder={`– Experience in marketing for 2 years\n– Experience in sales supervision for 1 year`}
+                  className="min-h-[100px] resize-none text-sm"
+                  dir="ltr"
+                  value={exp.descriptionEn || ""}
+                  onChange={(e) => onUpdate(exp.id, { descriptionEn: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
         </CardContent>
       )}
     </Card>
@@ -140,7 +177,8 @@ function ExperienceCard({
 }
 
 export default function ExperienceStep() {
-  const { cvData, updateCVData } = useCVContext();
+  const { cvData, updateCVData, cvLanguage } = useCVContext();
+  const isBilingual = cvLanguage === "bilingual";
 
   const addExperience = () => {
     const newExp: Experience = {
@@ -179,6 +217,7 @@ export default function ExperienceStep() {
             key={exp.id}
             exp={exp}
             index={index}
+            isBilingual={isBilingual}
             onUpdate={updateExperience}
             onDelete={deleteExperience}
           />

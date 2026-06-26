@@ -140,6 +140,28 @@ function minimalCSS() {
   `;
 }
 
+function bilingualCSS() {
+  return baseCSS + `
+    body { direction: ltr; }
+    .page { padding: 14mm 14mm; }
+    .bil-header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 6px; margin-bottom: 2px; }
+    .bil-name-en { font-size: 22pt; font-weight: 900; direction: ltr; font-family: Arial,'Times New Roman',serif; letter-spacing: -0.5px; }
+    .bil-name-ar { font-size: 22pt; font-weight: 900; direction: rtl; font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; }
+    .bil-contact { background: #e0e0e0; padding: 5px 12px; display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 2px; font-size: 9pt; direction: ltr; }
+    .bil-section { margin-top: 14px; }
+    .bil-sec-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1.5px solid #888; padding-bottom: 3px; margin-bottom: 8px; }
+    .bil-sec-en { font-size: 10pt; font-weight: 800; letter-spacing: 1.5px; direction: ltr; font-family: Arial,serif; }
+    .bil-sec-ar { font-size: 10pt; font-weight: 800; direction: rtl; font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; }
+    .bil-cols { display: flex; gap: 12px; }
+    .bil-col-en { flex: 1; direction: ltr; text-align: left; font-family: Arial,'Times New Roman',serif; font-size: 9.5pt; }
+    .bil-divider { width: 1px; background: #ddd; flex-shrink: 0; }
+    .bil-col-ar { flex: 1; direction: rtl; text-align: right; font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; font-size: 9.5pt; }
+    .bil-bullet { display: flex; gap: 5px; margin-bottom: 2px; }
+    .bil-kv { margin-bottom: 3px; }
+    .bil-kv strong { font-weight: 700; }
+  `;
+}
+
 // ─── HTML template generators ──────────────────────────────────────────────────
 function section(title: string, content: string) {
   return `<div class="section"><div class="section-header"><span class="section-title">${title}</span><div class="section-line"></div></div>${content}</div>`;
@@ -202,9 +224,123 @@ function buildHTML(cvData: CVData, templateId: TemplateId): string {
 </html>`;
 }
 
+// ─── Bilingual HTML builder ────────────────────────────────────────────────────
+function buildBilingualHTML(cvData: CVData): string {
+  const { personalInfo: p, education, experience, skills, courses } = cvData;
+  if (!p.fullName && !p.fullNameEn && education.length === 0 && experience.length === 0) return "";
+
+  const css = bilingualCSS();
+
+  const bullets = (text: string) =>
+    text.split("\n").filter(l => l.trim()).map(line =>
+      `<div class="bil-bullet"><span>–</span><span>${line.replace(/^[•\-–]\s*/, "")}</span></div>`
+    ).join("");
+
+  const biSection = (arTitle: string, enTitle: string, arContent: string, enContent: string) => `
+    <div class="bil-section">
+      <div class="bil-sec-header">
+        <span class="bil-sec-en">${enTitle}</span>
+        <span class="bil-sec-ar">${arTitle}</span>
+      </div>
+      <div class="bil-cols">
+        <div class="bil-col-en">${enContent}</div>
+        <div class="bil-divider"></div>
+        <div class="bil-col-ar">${arContent}</div>
+      </div>
+    </div>`;
+
+  const contactItems = [
+    p.email && `✉ ${p.email}`,
+    p.phone && `☎ ${p.phone}`,
+    p.location && `📍 ${p.location}`,
+  ].filter(Boolean);
+
+  const contactBar = contactItems.length
+    ? `<div class="bil-contact">${contactItems.map(i => `<span>${i}</span>`).join("")}</div>`
+    : "";
+
+  const summarySection = (p.summary || p.summaryEn)
+    ? biSection(
+        "الهدف الوظيفي", "CAREER OBJECTIVE",
+        `<p style="line-height:1.75;color:#333;">${p.summary || ""}</p>`,
+        `<p style="line-height:1.75;color:#333;">${p.summaryEn || ""}</p>`
+      )
+    : "";
+
+  const eduAr = education.map(e => `
+    <div style="margin-bottom:8px;">
+      ${e.degree ? `<div class="bil-kv"><strong>المؤهل:</strong> ${e.degree}</div>` : ""}
+      ${e.field ? `<div class="bil-kv"><strong>التخصص:</strong> ${e.field}</div>` : ""}
+      ${e.institution ? `<div class="bil-kv"><strong>جهة التعليم:</strong> ${e.institution}</div>` : ""}
+      ${e.endDate ? `<div style="font-size:9pt;color:#666;">${e.endDate}</div>` : ""}
+    </div>`).join("");
+
+  const eduEn = education.map(e => `
+    <div style="margin-bottom:8px;">
+      ${(e.degreeEn || e.degree) ? `<div class="bil-kv"><strong>Degree:</strong> ${e.degreeEn || e.degree}</div>` : ""}
+      ${(e.fieldEn || e.field) ? `<div class="bil-kv"><strong>Major:</strong> ${e.fieldEn || e.field}</div>` : ""}
+      ${(e.institutionEn || e.institution) ? `<div class="bil-kv"><strong>Institution:</strong> ${e.institutionEn || e.institution}</div>` : ""}
+      ${e.endDate ? `<div style="font-size:9pt;color:#666;">${e.endDate}</div>` : ""}
+    </div>`).join("");
+
+  const eduSection = education.length
+    ? biSection("التعليم", "EDUCATION", eduAr, eduEn)
+    : "";
+
+  const expAr = experience.map(e => `
+    <div style="margin-bottom:8px;">
+      ${e.jobTitle ? `<div style="font-weight:700;margin-bottom:2px;">${e.jobTitle}${e.company ? " · " + e.company : ""}</div>` : ""}
+      ${e.description ? bullets(e.description) : ""}
+    </div>`).join("");
+
+  const expEn = experience.map(e => `
+    <div style="margin-bottom:8px;">
+      ${(e.jobTitleEn || e.jobTitle) ? `<div style="font-weight:700;margin-bottom:2px;">${e.jobTitleEn || e.jobTitle}${(e.companyEn || e.company) ? " · " + (e.companyEn || e.company) : ""}</div>` : ""}
+      ${(e.descriptionEn || e.description) ? bullets(e.descriptionEn || e.description) : ""}
+    </div>`).join("");
+
+  const expSection = experience.length
+    ? biSection("الخبرات", "EXPERIENCE", expAr, expEn)
+    : "";
+
+  const coursesAr = courses.map(c => `<div class="bil-bullet"><span>–</span><span>${c.name}</span></div>`).join("");
+  const coursesEn = courses.map(c => `<div class="bil-bullet"><span>–</span><span>${c.nameEn || c.name}</span></div>`).join("");
+  const coursesSection = courses.length
+    ? biSection("الدورات", "COURSES", coursesAr, coursesEn)
+    : "";
+
+  const skillsAr = skills.map(s => `<div class="bil-bullet"><span>–</span><span>${s.name}</span></div>`).join("");
+  const skillsEn = skills.map(s => `<div class="bil-bullet"><span>–</span><span>${s.nameEn || s.name}</span></div>`).join("");
+  const skillsSection = skills.length
+    ? biSection("المهارات", "SKILLS", skillsAr, skillsEn)
+    : "";
+
+  return `<!DOCTYPE html>
+<html lang="ar">
+<head><meta charset="UTF-8"><title>السيرة الذاتية - ${p.fullName || p.fullNameEn || ""}</title><style>${css}</style></head>
+<body>
+  <div class="page">
+    <div class="bil-header">
+      <div class="bil-name-en">${p.fullNameEn || "Full Name"}</div>
+      <div class="bil-name-ar">${p.fullName || ""}</div>
+    </div>
+    ${contactBar}
+    ${summarySection}
+    ${eduSection}
+    ${expSection}
+    ${coursesSection}
+    ${skillsSection}
+  </div>
+</body>
+</html>`;
+}
+
 // ─── Public API ────────────────────────────────────────────────────────────────
 export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
-  const html = buildHTML(cvData, templateId);
+  const html = templateId === "bilingual"
+    ? buildBilingualHTML(cvData)
+    : buildHTML(cvData, templateId);
+
   if (!html) {
     alert("الرجاء إدخال بياناتك أولاً قبل الحفظ.");
     return;
@@ -221,9 +357,7 @@ export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
   printWindow.document.close();
 
   printWindow.onload = () => {
-    // Wait for Google Fonts (Noto Sans Arabic) to fully load before printing
     printWindow.document.fonts.ready.then(() => {
-      // Extra small delay for final layout settle
       setTimeout(() => {
         printWindow.focus();
         printWindow.print();
@@ -231,7 +365,7 @@ export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
     });
   };
 
-  // Fallback in case onload doesn't fire (e.g. some browsers)
+  // Fallback in case onload doesn't fire
   setTimeout(() => {
     try {
       printWindow.document.fonts.ready.then(() => {

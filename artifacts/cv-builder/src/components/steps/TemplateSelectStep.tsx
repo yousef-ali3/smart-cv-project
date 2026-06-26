@@ -1,7 +1,7 @@
-import { useCVContext, TemplateId } from "@/context/CVContext";
+import { useCVContext, TemplateId, CvLanguage } from "@/context/CVContext";
 import { Check } from "lucide-react";
 
-const templates: {
+const arOnlyTemplates: {
   id: TemplateId;
   name: string;
   nameEn: string;
@@ -143,68 +143,140 @@ const templates: {
   },
 ];
 
+const bilingualTemplate = {
+  id: "bilingual" as TemplateId,
+  name: "ثنائي اللغة",
+  nameEn: "Bilingual",
+  badge: "عربي + إنجليزي",
+  advantages: [
+    "عربي على اليمين وإنجليزي على اليسار",
+    "مثالي للتقديم في الشركات الدولية",
+    "يُبرز كفاءتك اللغوية بشكل احترافي",
+    "تصميم متوازن وأنيق",
+  ],
+  preview: (
+    <div className="w-full h-full bg-white p-2">
+      <div className="flex justify-between items-end mb-1.5 pb-1 border-b border-gray-300">
+        <div className="h-2 bg-gray-900 rounded w-16" />
+        <div className="h-2 bg-gray-900 rounded w-16" />
+      </div>
+      <div className="h-3 bg-gray-200 rounded mb-1.5 w-full" />
+      {[["EXPERIENCE", "الخبرات"], ["EDUCATION", "التعليم"], ["SKILLS", "المهارات"]].map(([en, ar]) => (
+        <div key={en} className="mb-1.5">
+          <div className="flex justify-between items-center pb-0.5 mb-0.5 border-b border-gray-400">
+            <div className="h-1 bg-gray-700 rounded w-10" />
+            <div className="h-1 bg-gray-700 rounded w-10" />
+          </div>
+          <div className="flex gap-1">
+            <div className="flex-1 space-y-0.5">
+              <div className="h-0.5 bg-gray-200 rounded w-full" />
+              <div className="h-0.5 bg-gray-200 rounded w-3/4" />
+            </div>
+            <div className="w-px bg-gray-200" />
+            <div className="flex-1 space-y-0.5">
+              <div className="h-0.5 bg-gray-200 rounded w-full" />
+              <div className="h-0.5 bg-gray-200 rounded w-3/4" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
 export default function TemplateSelectStep() {
-  const { selectedTemplate, setSelectedTemplate } = useCVContext();
+  const { selectedTemplate, setSelectedTemplate, cvLanguage, setCvLanguage } = useCVContext();
+
+  const handleLanguageChange = (lang: CvLanguage) => {
+    setCvLanguage(lang);
+    if (lang === "bilingual") {
+      setSelectedTemplate("bilingual");
+    } else if (selectedTemplate === "bilingual") {
+      setSelectedTemplate("ats");
+    }
+  };
+
+  const templates = cvLanguage === "bilingual"
+    ? [bilingualTemplate]
+    : arOnlyTemplates;
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-foreground mb-1">اختيار القالب</h2>
-        <p className="text-sm text-muted-foreground">اختر القالب الذي يناسبك — المعاينة تتحدث فوراً</p>
+        <p className="text-sm text-muted-foreground">اختر لغة السيرة الذاتية والقالب المناسب</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {templates.map((t) => {
-          const isSelected = selectedTemplate === t.id;
-          return (
-            <div
-              key={t.id}
-              onClick={() => setSelectedTemplate(t.id)}
-              className={`relative rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${
-                isSelected
-                  ? "border-black shadow-lg"
-                  : "border-border hover:border-gray-400"
-              }`}
-            >
-              {/* Selected checkmark */}
-              {isSelected && (
-                <div className="absolute top-2 left-2 z-10 w-6 h-6 bg-black rounded-full flex items-center justify-center">
-                  <Check className="w-3.5 h-3.5 text-white" />
+      {/* Language selector */}
+      <div>
+        <p className="text-sm font-semibold text-foreground mb-2">لغة السيرة الذاتية</p>
+        <div className="grid grid-cols-2 gap-3">
+          {(["ar", "bilingual"] as CvLanguage[]).map((lang) => {
+            const isSelected = cvLanguage === lang;
+            return (
+              <button
+                key={lang}
+                onClick={() => handleLanguageChange(lang)}
+                className={`rounded-xl border-2 p-3 text-center transition-all cursor-pointer ${
+                  isSelected ? "border-black bg-black text-white" : "border-border hover:border-gray-400 bg-white text-foreground"
+                }`}
+              >
+                <div className="text-lg mb-0.5">{lang === "ar" ? "🇸🇦" : "🌐"}</div>
+                <div className="font-bold text-sm">{lang === "ar" ? "عربي فقط" : "عربي + إنجليزي"}</div>
+                <div className={`text-xs mt-0.5 ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>
+                  {lang === "ar" ? "Arabic only" : "Bilingual"}
                 </div>
-              )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-              {/* Badge */}
-              {t.badge && (
-                <div className="absolute top-2 right-2 z-10 bg-black text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  {t.badge}
+      {/* Template grid */}
+      <div>
+        <p className="text-sm font-semibold text-foreground mb-2">القالب</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {templates.map((t) => {
+            const isSelected = selectedTemplate === t.id;
+            return (
+              <div
+                key={t.id}
+                onClick={() => setSelectedTemplate(t.id)}
+                className={`relative rounded-xl border-2 cursor-pointer transition-all overflow-hidden ${
+                  isSelected ? "border-black shadow-lg" : "border-border hover:border-gray-400"
+                }`}
+              >
+                {isSelected && (
+                  <div className="absolute top-2 left-2 z-10 w-6 h-6 bg-black rounded-full flex items-center justify-center">
+                    <Check className="w-3.5 h-3.5 text-white" />
+                  </div>
+                )}
+                {t.badge && (
+                  <div className="absolute top-2 right-2 z-10 bg-black text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {t.badge}
+                  </div>
+                )}
+                <div className="h-36 bg-gray-50 border-b border-border overflow-hidden">
+                  <div className="w-full h-full scale-[0.85] origin-top">{t.preview}</div>
                 </div>
-              )}
-
-              {/* Mini preview */}
-              <div className="h-36 bg-gray-50 border-b border-border overflow-hidden">
-                <div className="w-full h-full scale-[0.85] origin-top">
-                  {t.preview}
+                <div className="p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-sm text-foreground">{t.name}</h3>
+                    <span className="text-[10px] text-muted-foreground">{t.nameEn}</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {t.advantages.map((adv, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                        <span className="mt-0.5 text-black font-bold shrink-0">✓</span>
+                        {adv}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-
-              {/* Info */}
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-sm text-foreground">{t.name}</h3>
-                  <span className="text-[10px] text-muted-foreground">{t.nameEn}</span>
-                </div>
-                <ul className="space-y-1">
-                  {t.advantages.map((adv, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                      <span className="mt-0.5 text-black font-bold shrink-0">✓</span>
-                      {adv}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

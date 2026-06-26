@@ -13,6 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import ProfessionalSummary from "@/components/ProfessionalSummary";
 import {
   User,
@@ -42,19 +44,33 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function PersonalInfoStep() {
-  const { cvData, updateCVData } = useCVContext();
+  const { cvData, updateCVData, cvLanguage } = useCVContext();
+  const isBilingual = cvLanguage === "bilingual";
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: cvData.personalInfo,
+    defaultValues: {
+      fullName: cvData.personalInfo.fullName,
+      jobTitle: cvData.personalInfo.jobTitle,
+      email: cvData.personalInfo.email,
+      phone: cvData.personalInfo.phone,
+      location: cvData.personalInfo.location,
+      website: cvData.personalInfo.website,
+      linkedin: cvData.personalInfo.linkedin,
+      summary: cvData.personalInfo.summary,
+    },
   });
 
   useEffect(() => {
     const subscription = form.watch((values) => {
-      updateCVData({ personalInfo: values as PersonalInfo });
+      updateCVData({ personalInfo: { ...cvData.personalInfo, ...(values as PersonalInfo) } });
     });
     return () => subscription.unsubscribe();
   }, [form, updateCVData]);
+
+  const updateEnField = (field: Partial<PersonalInfo>) => {
+    updateCVData({ personalInfo: { ...cvData.personalInfo, ...field } });
+  };
 
   return (
     <div className="space-y-6">
@@ -73,7 +89,7 @@ export default function PersonalInfoStep() {
             control={form.control}
             name="fullName"
             render={({ field }) => (
-              <FormItem className="sm:col-span-2">
+              <FormItem className={isBilingual ? "" : "sm:col-span-2"}>
                 <FormLabel className="flex items-center gap-2">
                   <User className="w-4 h-4" />
                   الاسم الكامل *
@@ -89,6 +105,23 @@ export default function PersonalInfoStep() {
               </FormItem>
             )}
           />
+
+          {/* English name — only when bilingual */}
+          {isBilingual && (
+            <div className="space-y-1">
+              <Label className="flex items-center gap-2 text-sm font-medium">
+                <User className="w-4 h-4" />
+                Full Name (English)
+              </Label>
+              <Input
+                placeholder="First Last"
+                dir="ltr"
+                value={cvData.personalInfo.fullNameEn || ""}
+                onChange={(e) => updateEnField({ fullNameEn: e.target.value })}
+                data-testid="input-full-name-en"
+              />
+            </div>
+          )}
 
           <FormField
             control={form.control}
@@ -217,7 +250,6 @@ export default function PersonalInfoStep() {
             )}
           />
 
-          {/* مكوّن الملخص المهني (كتابة يدوية أو مساعد) */}
           <FormField
             control={form.control}
             name="summary"
@@ -228,7 +260,7 @@ export default function PersonalInfoStep() {
                   onChange={(val) => {
                     form.setValue("summary", val, { shouldValidate: true });
                     updateCVData({
-                      personalInfo: { ...form.getValues(), summary: val },
+                      personalInfo: { ...cvData.personalInfo, ...form.getValues(), summary: val },
                     });
                   }}
                 />
@@ -238,6 +270,27 @@ export default function PersonalInfoStep() {
           />
         </div>
       </Form>
+
+      {/* English summary — only when bilingual */}
+      {isBilingual && (
+        <div className="border-t pt-4 space-y-2">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">English Fields</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-sm font-medium">Career Objective (English)</Label>
+            <Textarea
+              placeholder="I aspire to join your esteemed organization to contribute my knowledge and professional services..."
+              dir="ltr"
+              className="min-h-[100px] resize-none text-sm"
+              value={cvData.personalInfo.summaryEn || ""}
+              onChange={(e) => updateEnField({ summaryEn: e.target.value })}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

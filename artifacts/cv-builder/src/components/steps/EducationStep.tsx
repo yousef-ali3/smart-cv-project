@@ -15,11 +15,13 @@ function generateId() {
 function EducationCard({
   edu,
   index,
+  isBilingual,
   onUpdate,
   onDelete,
 }: {
   edu: Education;
   index: number;
+  isBilingual: boolean;
   onUpdate: (id: string, data: Partial<Education>) => void;
   onDelete: (id: string) => void;
 }) {
@@ -116,6 +118,42 @@ function EducationCard({
               data-testid={`textarea-edu-desc-${edu.id}`}
             />
           </div>
+
+          {/* English fields — bilingual only */}
+          {isBilingual && (
+            <div className="border-t pt-3 space-y-3">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">English Fields</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Degree</Label>
+                  <Input
+                    placeholder="Bachelor's, Master's..."
+                    dir="ltr"
+                    value={edu.degreeEn || ""}
+                    onChange={(e) => onUpdate(edu.id, { degreeEn: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Major / Field</Label>
+                  <Input
+                    placeholder="Computer Science, Business..."
+                    dir="ltr"
+                    value={edu.fieldEn || ""}
+                    onChange={(e) => onUpdate(edu.id, { fieldEn: e.target.value })}
+                  />
+                </div>
+                <div className="sm:col-span-2 space-y-1">
+                  <Label className="text-xs">Institution</Label>
+                  <Input
+                    placeholder="King Saud University"
+                    dir="ltr"
+                    value={edu.institutionEn || ""}
+                    onChange={(e) => onUpdate(edu.id, { institutionEn: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       )}
     </Card>
@@ -123,7 +161,8 @@ function EducationCard({
 }
 
 export default function EducationStep() {
-  const { cvData, updateCVData } = useCVContext();
+  const { cvData, updateCVData, cvLanguage } = useCVContext();
+  const isBilingual = cvLanguage === "bilingual";
 
   const addEducation = () => {
     const newEdu: Education = {
@@ -162,6 +201,7 @@ export default function EducationStep() {
             key={edu.id}
             edu={edu}
             index={index}
+            isBilingual={isBilingual}
             onUpdate={updateEducation}
             onDelete={deleteEducation}
           />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCVContext } from "@/context/CVContext";
-import { Language, Course } from "@/types/cv";
+import { Language, Course, Skill } from "@/types/cv";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,17 +14,19 @@ function generateId() {
 const languageLevels: Language["level"][] = ["مبتدئ", "متوسط", "جيد", "ممتاز", "اللغة الأم"];
 
 export default function SkillsStep() {
-  const { cvData, updateCVData } = useCVContext();
+  const { cvData, updateCVData, cvLanguage } = useCVContext();
+  const isBilingual = cvLanguage === "bilingual";
   const [newSkill, setNewSkill] = useState("");
+  const [newSkillEn, setNewSkillEn] = useState("");
   const [newLang, setNewLang] = useState("");
   const [newLangLevel, setNewLangLevel] = useState<Language["level"]>("جيد");
 
   const addSkill = () => {
     if (!newSkill.trim()) return;
-    updateCVData({
-      skills: [...cvData.skills, { id: generateId(), name: newSkill.trim() }],
-    });
+    const skill: Skill = { id: generateId(), name: newSkill.trim(), nameEn: newSkillEn.trim() || undefined };
+    updateCVData({ skills: [...cvData.skills, skill] });
     setNewSkill("");
+    setNewSkillEn("");
   };
 
   const deleteSkill = (id: string) => {
@@ -81,7 +83,7 @@ export default function SkillsStep() {
                 className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-muted text-foreground border border-border"
                 data-testid={`badge-skill-${skill.id}`}
               >
-                <span>{skill.name}</span>
+                <span>{skill.name}{isBilingual && skill.nameEn ? ` / ${skill.nameEn}` : ""}</span>
                 <button
                   onClick={() => deleteSkill(skill.id)}
                   className="mr-1 opacity-50 hover:opacity-100 transition-opacity"
@@ -92,18 +94,37 @@ export default function SkillsStep() {
               </div>
             ))}
           </div>
-          <div className="flex gap-2">
-            <Input
-              placeholder="اسم المهارة (مثال: Python، Excel، تحليل البيانات...)"
-              value={newSkill}
-              onChange={(e) => setNewSkill(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addSkill()}
-              className="flex-1"
-              data-testid="input-new-skill"
-            />
-            <Button onClick={addSkill} size="sm" data-testid="button-add-skill">
-              <Plus className="w-4 h-4" />
-            </Button>
+          <div className={`flex gap-2 ${isBilingual ? "flex-col" : ""}`}>
+            <div className={`flex gap-2 ${isBilingual ? "w-full" : "flex-1"}`}>
+              <Input
+                placeholder="اسم المهارة (مثال: Python، Excel...)"
+                value={newSkill}
+                onChange={(e) => setNewSkill(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addSkill()}
+                className="flex-1"
+                data-testid="input-new-skill"
+              />
+              {!isBilingual && (
+                <Button onClick={addSkill} size="sm" data-testid="button-add-skill">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+            {isBilingual && (
+              <div className="flex gap-2 w-full">
+                <Input
+                  placeholder="Skill in English (e.g. Python, Data Analysis...)"
+                  dir="ltr"
+                  value={newSkillEn}
+                  onChange={(e) => setNewSkillEn(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addSkill()}
+                  className="flex-1"
+                />
+                <Button onClick={addSkill} size="sm" data-testid="button-add-skill">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -170,54 +191,69 @@ export default function SkillsStep() {
         </CardHeader>
         <CardContent className="space-y-3">
           {cvData.courses.map((course) => (
-            <div key={course.id} className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-lg border border-border" data-testid={`card-course-${course.id}`}>
-              <div className="space-y-1">
-                <Label className="text-xs">اسم الدورة / الشهادة</Label>
-                <Input
-                  placeholder="دورة PMP، شهادة AWS..."
-                  value={course.name}
-                  onChange={(e) => updateCourse(course.id, { name: e.target.value })}
-                  data-testid={`input-course-name-${course.id}`}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">جهة الإصدار</Label>
-                <Input
-                  placeholder="Coursera، PMI، Google..."
-                  value={course.provider}
-                  onChange={(e) => updateCourse(course.id, { provider: e.target.value })}
-                  data-testid={`input-course-provider-${course.id}`}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">تاريخ الحصول</Label>
-                <Input
-                  placeholder="مارس 2023"
-                  value={course.date}
-                  onChange={(e) => updateCourse(course.id, { date: e.target.value })}
-                  data-testid={`input-course-date-${course.id}`}
-                />
-              </div>
-              <div className="space-y-1 flex items-end gap-2">
-                <div className="flex-1 space-y-1">
-                  <Label className="text-xs">رقم الشهادة (اختياري)</Label>
+            <div key={course.id} className="p-3 rounded-lg border border-border space-y-3" data-testid={`card-course-${course.id}`}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">اسم الدورة / الشهادة</Label>
                   <Input
-                    placeholder="CERT-12345"
-                    value={course.certificateId}
-                    onChange={(e) => updateCourse(course.id, { certificateId: e.target.value })}
-                    data-testid={`input-course-cert-${course.id}`}
+                    placeholder="دورة PMP، شهادة AWS..."
+                    value={course.name}
+                    onChange={(e) => updateCourse(course.id, { name: e.target.value })}
+                    data-testid={`input-course-name-${course.id}`}
                   />
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive hover:text-destructive mb-0.5"
-                  onClick={() => deleteCourse(course.id)}
-                  data-testid={`button-delete-course-${course.id}`}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="space-y-1">
+                  <Label className="text-xs">جهة الإصدار</Label>
+                  <Input
+                    placeholder="Coursera، PMI، Google..."
+                    value={course.provider}
+                    onChange={(e) => updateCourse(course.id, { provider: e.target.value })}
+                    data-testid={`input-course-provider-${course.id}`}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">تاريخ الحصول</Label>
+                  <Input
+                    placeholder="مارس 2023"
+                    value={course.date}
+                    onChange={(e) => updateCourse(course.id, { date: e.target.value })}
+                    data-testid={`input-course-date-${course.id}`}
+                  />
+                </div>
+                <div className="space-y-1 flex items-end gap-2">
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-xs">رقم الشهادة (اختياري)</Label>
+                    <Input
+                      placeholder="CERT-12345"
+                      value={course.certificateId}
+                      onChange={(e) => updateCourse(course.id, { certificateId: e.target.value })}
+                      data-testid={`input-course-cert-${course.id}`}
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:text-destructive mb-0.5"
+                    onClick={() => deleteCourse(course.id)}
+                    data-testid={`button-delete-course-${course.id}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
+
+              {/* English course name — bilingual only */}
+              {isBilingual && (
+                <div className="border-t pt-2 space-y-1">
+                  <Label className="text-xs text-muted-foreground">Course Name (English)</Label>
+                  <Input
+                    placeholder="Cybersecurity, Fundamentals of Managing Tourism Events..."
+                    dir="ltr"
+                    value={course.nameEn || ""}
+                    onChange={(e) => updateCourse(course.id, { nameEn: e.target.value })}
+                  />
+                </div>
+              )}
             </div>
           ))}
           <Button
