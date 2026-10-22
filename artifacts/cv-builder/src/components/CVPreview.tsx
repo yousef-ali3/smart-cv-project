@@ -56,8 +56,7 @@ function CVDocument({ data, template }: { data: CVData; template: string }) {
   const pageStyle: CSSProperties = {
     fontFamily: "'Noto Sans Arabic', Arial, sans-serif",
     direction: "rtl",
-    width: "100%",
-    minHeight: "297mm",
+    aspectRatio: "210 / 297",
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
@@ -166,8 +165,8 @@ function CVDocument({ data, template }: { data: CVData; template: string }) {
         flex: "1 0 auto",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-evenly",
-        gap: 22,
+        justifyContent: "flex-start",
+        gap: 12,
         padding: template === "corporate" ? "4px 16mm 0" : "8px 0 0",
       }}>
         {sections.map((item) => (

@@ -130,7 +130,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       <title>السيرة الذاتية - ${text(p.fullName)}</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
-        @page { size: A4; margin: 0; }
+        @page { size: 210mm 297mm; margin: 0; }
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; }
         body { color: #111; background: #fff; font: 10.5pt/1.55 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -138,7 +138,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
         .header { flex: 0 0 auto; }
         .name { line-height: 1.35; }
         .contact { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; font-size: 9pt; color: #444; }
-        .content { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: space-evenly; gap: 7mm; padding-top: 5mm; }
+        .content { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; padding-top: 5mm; }
         .section { break-inside: avoid; page-break-inside: avoid; }
         .section-title { margin: 0 0 6px; font-size: 10.5pt; font-weight: 700; }
         .entry { margin-bottom: 7px; break-inside: avoid; page-break-inside: avoid; }
