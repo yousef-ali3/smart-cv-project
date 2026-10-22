@@ -56,11 +56,10 @@ function CVDocument({ data, template }: { data: CVData; template: string }) {
   const pageStyle: CSSProperties = {
     fontFamily: "'Noto Sans Arabic', Arial, sans-serif",
     direction: "rtl",
-    aspectRatio: "210 / 297",
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
-    padding: template === "minimal" ? "16mm 18mm" : template === "corporate" ? "0 0 14mm" : "14mm 16mm",
+    padding: template === "minimal" ? "16mm 18mm 6mm" : template === "corporate" ? "0 0 6mm" : "14mm 16mm 6mm",
     background: "#fff",
     color: "#111",
     fontSize: 10,

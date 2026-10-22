@@ -87,7 +87,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
 
   const templateStyles: Record<TemplateId, string> = {
     ats: `
-      .page { padding: 16mm; }
+      .page { padding: 16mm 16mm 6mm; }
       .header { text-align: center; border-bottom: 2px solid #111; padding-bottom: 12px; }
       .name { font-size: 23pt; font-weight: 800; }
       .job-title { margin-top: 3px; font-size: 11pt; font-weight: 600; }
@@ -96,7 +96,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       .section-title::after { content: ""; flex: 1; height: 1px; background: #aaa; }
     `,
     modern: `
-      .page { padding: 16mm; }
+      .page { padding: 16mm 16mm 6mm; }
       .header { border-bottom: 2px solid #111; padding-bottom: 10px; }
       .name { font-size: 25pt; font-weight: 800; }
       .job-title { margin-top: 3px; font-size: 11pt; }
@@ -104,7 +104,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       .tag { background: #111; color: #fff; }
     `,
     corporate: `
-      .page { padding: 0 0 14mm; }
+      .page { padding: 0 0 6mm; }
       .header { background: #111; color: #fff; padding: 16mm; }
       .name { font-size: 25pt; font-weight: 800; }
       .job-title { margin-top: 3px; color: #ddd; font-size: 11pt; }
@@ -113,7 +113,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       .section-title { border-bottom: 2px solid #111; padding-bottom: 4px; }
     `,
     minimal: `
-      .page { padding: 19mm 18mm; }
+      .page { padding: 19mm 18mm 6mm; }
       .header { padding-bottom: 9px; border-bottom: 1px dashed #aaa; }
       .name { font-size: 26pt; font-weight: 800; }
       .job-title { margin-top: 3px; color: #555; font-size: 11pt; }
@@ -130,15 +130,15 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       <title>السيرة الذاتية - ${text(p.fullName)}</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
-        @page { size: 210mm 297mm; margin: 0; }
+        @page { margin: 0; }
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; }
         body { color: #111; background: #fff; font: 10.5pt/1.55 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .page { width: 210mm; min-height: 297mm; margin: 0 auto; display: flex; flex-direction: column; }
+        .page { width: 210mm; margin: 0 auto; display: flex; flex-direction: column; }
         .header { flex: 0 0 auto; }
         .name { line-height: 1.35; }
         .contact { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; font-size: 9pt; color: #444; }
-        .content { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; padding-top: 5mm; }
+        .content { display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; padding-top: 5mm; }
         .section { break-inside: avoid; page-break-inside: avoid; }
         .section-title { margin: 0 0 6px; font-size: 10.5pt; font-weight: 700; }
         .entry { margin-bottom: 7px; break-inside: avoid; page-break-inside: avoid; }
@@ -183,15 +183,35 @@ export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
   printWindow.document.write(html);
   printWindow.document.close();
 
+  let isPreparing = false;
   let hasPrinted = false;
   const print = () => {
-    if (hasPrinted || printWindow.closed) return;
-    hasPrinted = true;
-    printWindow.focus();
-    printWindow.print();
+    if (isPreparing || hasPrinted || printWindow.closed) return;
+    isPreparing = true;
+    void printWindow.document.fonts.ready.then(() => {
+      window.requestAnimationFrame(() => {
+        const page = printWindow.document.querySelector<HTMLElement>(".page");
+        if (!page || printWindow.closed) return;
+
+        // Keep the A4 width, but set the printed page height to the content
+        // height so a short CV does not leave a large blank tail.
+        const heightMm = Math.ceil((page.scrollHeight * 25.4) / 96);
+        const pageSizeStyle = printWindow.document.createElement("style");
+        pageSizeStyle.textContent = `@page { size: 210mm ${heightMm}mm; margin: 0; }`;
+        printWindow.document.head.appendChild(pageSizeStyle);
+        page.style.height = `${heightMm}mm`;
+
+        window.setTimeout(() => {
+          if (printWindow.closed || hasPrinted) return;
+          hasPrinted = true;
+          printWindow.focus();
+          printWindow.print();
+        }, 100);
+      });
+    });
   };
   printWindow.onload = () => {
-    void printWindow.document.fonts.ready.then(() => window.setTimeout(print, 150));
+    print();
   };
   window.setTimeout(print, 3000);
 }
