@@ -1,350 +1,173 @@
 import type { CVData } from "@/types/cv";
 import type { TemplateId } from "@/context/CVContext";
 
-// ─── Shared block builders ─────────────────────────────────────────────────────
-function buildBlocks(cvData: CVData) {
-  const { personalInfo: p, education, experience, skills, courses, languages } = cvData;
+const escapeHTML = (value: string) =>
+  value.replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[char] ?? char);
 
-  const contact = [
-    p.email && `<span>${p.email}</span>`,
-    p.phone && `<span>${p.phone}</span>`,
-    p.location && `<span>${p.location}</span>`,
-    p.linkedin && `<span>${p.linkedin}</span>`,
-    p.website && `<span>${p.website}</span>`,
-  ].filter(Boolean);
+const text = (value?: string) => escapeHTML(value || "");
+const multiline = (value?: string) => text(value).replace(/\n/g, "<br>");
 
-  const expHTML = experience.map(e => `
-    <div class="entry">
-      <div class="entry-top">
-        <div>
-          <div class="entry-title">${e.jobTitle || ""}</div>
-          <div class="entry-sub">${e.company || ""}${e.location ? " · " + e.location : ""}</div>
-        </div>
-        <div class="entry-date">${e.startDate || ""}${(e.startDate || e.endDate) ? " – " : ""}${e.current ? "حتى الآن" : (e.endDate || "")}</div>
-      </div>
-      ${e.description ? `<div class="entry-desc">${e.description.replace(/\n/g, "<br>")}</div>` : ""}
-    </div>`).join("");
-
-  const eduHTML = education.map(ed => `
-    <div class="entry">
-      <div class="entry-top">
-        <div>
-          <div class="entry-title">${ed.degree || ""}${ed.field ? " في " + ed.field : ""}</div>
-          <div class="entry-sub">${ed.institution || ""}${ed.gpa ? " · المعدل: " + ed.gpa : ""}</div>
-        </div>
-        ${ed.endDate ? `<div class="entry-date">${ed.endDate}</div>` : ""}
-      </div>
-      ${ed.description ? `<div class="entry-desc">${ed.description.replace(/\n/g, "<br>")}</div>` : ""}
-    </div>`).join("");
-
-  const skillsHTML = `<div class="skills-grid">${skills.map(s => `<span class="skill-tag">${s.name}</span>`).join("")}</div>`;
-  const langsHTML = `<div class="skills-grid">${languages.map(l => `<span class="skill-tag">${l.name}${l.level ? " · " + l.level : ""}</span>`).join("")}</div>`;
-  const coursesHTML = courses.map(c => `
-    <div class="entry">
-      <div class="entry-top">
-        <div>
-          <div class="entry-title">${c.name || ""}</div>
-          ${c.provider ? `<div class="entry-sub">${c.provider}${c.certificateId ? " · " + c.certificateId : ""}</div>` : ""}
-        </div>
-        ${c.date ? `<div class="entry-date">${c.date}</div>` : ""}
-      </div>
-    </div>`).join("");
-
-  return { p, contact, expHTML, eduHTML, skillsHTML, langsHTML, coursesHTML, hasSkills: skills.length > 0, hasLangs: languages.length > 0, hasExp: experience.length > 0, hasEdu: education.length > 0, hasCourses: courses.length > 0 };
-}
-
-// ─── Template stylesheets ──────────────────────────────────────────────────────
-const baseCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&display=swap');
-  @page { margin: 0; size: A4; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; color: #111; background: #fff; font-size: 11pt; line-height: 1.5; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .page { max-width: 210mm; margin: 0 auto; min-height: 297mm; box-sizing: border-box; display: flex; flex-direction: column; }
-  .content { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-  .entry { margin-bottom: 10px; }
-  .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .entry-title { font-size: 11pt; font-weight: 700; color: #000; }
-  .entry-sub { font-size: 10pt; color: #444; font-weight: 600; }
-  .entry-date { font-size: 9pt; color: #666; white-space: nowrap; margin-top: 1px; }
-  .entry-desc { font-size: 10pt; color: #333; margin-top: 4px; white-space: pre-line; }
-  .summary { font-size: 10.5pt; color: #333; line-height: 1.7; }
-  .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-`;
-
-function atsCSS() {
-  return baseCSS + `
-    .page { padding: 18mm 16mm; }
-    .header { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #111; padding-bottom: 14px; }
-    .name { font-size: 24pt; font-weight: 900; color: #000; letter-spacing: -0.5px; }
-    .job-title { font-size: 12pt; font-weight: 600; color: #444; margin-top: 4px; }
-    .contact { margin-top: 8px; font-size: 9pt; color: #555; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 0; }
-    .sep { margin: 0 6px; color: #bbb; }
-    .section { margin-top: 14px; }
-    .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .section-title { font-size: 10pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #000; white-space: nowrap; }
-    .section-line { flex: 1; height: 1.5px; background: #ccc; }
-    .skill-tag { background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; padding: 2px 10px; font-size: 9.5pt; color: #222; }
-  `;
-}
-
-function modernCSS() {
-  return baseCSS + `
-    .page { padding: 18mm 16mm; }
-    .header { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #000; }
-    .name { font-size: 26pt; font-weight: 900; color: #000; letter-spacing: -1px; }
-    .job-title { font-size: 12pt; font-weight: 600; color: #444; margin-top: 3px; }
-    .contact { margin-top: 8px; font-size: 9pt; color: #555; display: flex; flex-wrap: wrap; gap: 4px 14px; }
-    .sep { display: none; }
-    .section { margin-top: 14px; }
-    .section-header { border-right: 3px solid #000; padding-right: 8px; margin-bottom: 8px; }
-    .section-title { font-size: 11pt; font-weight: 800; color: #000; }
-    .section-line { display: none; }
-    .entry { padding-right: 10px; }
-    .entry-date { background: #f3f3f3; padding: 2px 10px; border-radius: 12px; }
-    .skills-grid { padding-right: 10px; }
-    .skill-tag { background: #111; color: #fff; border-radius: 4px; padding: 2px 10px; font-size: 9.5pt; }
-  `;
-}
-
-function corporateCSS() {
-  return baseCSS + `
-    .header { background: #111; color: #fff; padding: 18px 16mm; margin-bottom: 4px; }
-    .name { font-size: 26pt; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
-    .job-title { font-size: 12pt; color: #ccc; margin-top: 4px; font-weight: 500; }
-    .contact { margin-top: 12px; font-size: 9pt; color: #bbb; display: flex; flex-wrap: wrap; gap: 4px 14px; }
-    .sep { display: none; }
-    .body { padding: 4px 16mm 18mm; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .section { margin-top: 14px; }
-    .section-header { margin-bottom: 8px; }
-    .section-title { font-size: 11pt; font-weight: 800; color: #000; text-transform: uppercase; letter-spacing: 2px; display: block; padding-bottom: 4px; border-bottom: 2px solid #000; }
-    .section-line { display: none; }
-    .skill-tag { border: 1.5px solid #111; border-radius: 3px; padding: 2px 10px; font-size: 9.5pt; color: #111; font-weight: 500; }
-  `;
-}
-
-function minimalCSS() {
-  return baseCSS + `
-    .page { padding: 22mm 18mm; }
-    .header { margin-bottom: 16px; }
-    .name { font-size: 28pt; font-weight: 900; color: #111; letter-spacing: -1.2px; }
-    .job-title { font-size: 12pt; color: #777; margin-top: 4px; font-style: italic; }
-    .contact { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; font-size: 9pt; color: #666; display: flex; flex-wrap: wrap; gap: 4px 16px; }
-    .sep { display: none; }
-    .section { margin-top: 18px; }
-    .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .section-title { font-size: 10pt; font-weight: 700; color: #555; letter-spacing: 1.5px; text-transform: uppercase; }
-    .section-line { display: none; }
-    .section-header::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #555; display: inline-block; flex-shrink: 0; }
-    .entry-date { font-style: italic; color: #999; }
-    .entry-desc { line-height: 1.7; color: #555; }
-    .skill-tag { background: #f8f8f8; border: 1px solid #e5e5e5; border-radius: 20px; padding: 3px 12px; font-size: 9.5pt; color: #333; }
-  `;
-}
-
-function bilingualCSS() {
-  return baseCSS + `
-    body { direction: ltr; }
-    .page { padding: 14mm 14mm; min-height: 297mm; box-sizing: border-box; display: flex; flex-direction: column; }
-    .bil-header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 6px; margin-bottom: 2px; }
-    .bil-name-en { font-size: 22pt; font-weight: 900; direction: ltr; font-family: Arial,'Times New Roman',serif; letter-spacing: -0.5px; }
-    .bil-name-ar { font-size: 22pt; font-weight: 900; direction: rtl; font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; }
-    .bil-contact { background: #e0e0e0; padding: 5px 12px; display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 2px; font-size: 9pt; direction: ltr; }
-    .bil-content { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .bil-section { margin-top: 10px; }
-    .bil-sec-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1.5px solid #888; padding-bottom: 3px; margin-bottom: 8px; }
-    .bil-sec-en { font-size: 10pt; font-weight: 800; letter-spacing: 1.5px; direction: ltr; font-family: Arial,serif; }
-    .bil-sec-ar { font-size: 10pt; font-weight: 800; direction: rtl; font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; }
-    .bil-cols { display: flex; gap: 12px; }
-    .bil-col-en { flex: 1; direction: ltr; text-align: left; font-family: Arial,'Times New Roman',serif; font-size: 9.5pt; }
-    .bil-divider { width: 1px; background: #ddd; flex-shrink: 0; }
-    .bil-col-ar { flex: 1; direction: rtl; text-align: right; font-family: 'Noto Sans Arabic','Segoe UI',Arial,sans-serif; font-size: 9.5pt; }
-    .bil-bullet { display: flex; gap: 5px; margin-bottom: 2px; }
-    .bil-kv { margin-bottom: 3px; }
-    .bil-kv strong { font-weight: 700; }
-  `;
-}
-
-// ─── HTML template generators ──────────────────────────────────────────────────
 function section(title: string, content: string) {
-  return `<div class="section"><div class="section-header"><span class="section-title">${title}</span><div class="section-line"></div></div>${content}</div>`;
+  return `<section class="section"><h2 class="section-title">${title}</h2>${content}</section>`;
 }
 
-function buildHTML(cvData: CVData, templateId: TemplateId): string {
-  const b = buildBlocks(cvData);
-  if (!b.p.fullName && !b.hasEdu && !b.hasExp) return "";
+function buildHTML(cvData: CVData, template: TemplateId) {
+  const { personalInfo: p, education, experience, skills, courses, languages } = cvData;
+  if (!p.fullName && !p.email && !education.length && !experience.length) return "";
 
-  let css: string;
-  switch (templateId) {
-    case "modern": css = modernCSS(); break;
-    case "corporate": css = corporateCSS(); break;
-    case "minimal": css = minimalCSS(); break;
-    default: css = atsCSS();
-  }
+  const contacts = [p.email, p.phone, p.location, p.linkedin, p.website]
+    .filter(Boolean)
+    .map((item) => `<span>${text(item)}</span>`)
+    .join('<span class="contact-separator" aria-hidden="true">|</span>');
 
-  // ATS header uses pipe separators; others use spacing
-  const sep = templateId === "ats" ? '<span class="sep">|</span>' : "";
-  const contactHTML = b.contact.length ? `<div class="contact">${b.contact.join(sep)}</div>` : "";
+  const summary = p.summary
+    ? section("الملخص المهني", `<p class="summary">${multiline(p.summary)}</p>`)
+    : "";
+  const educationHTML = education.length
+    ? section("المؤهلات العلمية", education.map((item) => `
+        <div class="entry">
+          <div class="entry-top">
+            <div>
+              <div class="entry-title">${text(item.degree)}${item.field ? ` في ${text(item.field)}` : ""}</div>
+              <div class="entry-sub">${text(item.institution)}${item.gpa ? ` · المعدل: ${text(item.gpa)}` : ""}</div>
+            </div>
+            ${item.endDate ? `<div class="entry-date">${text(item.endDate)}</div>` : ""}
+          </div>
+          ${item.description ? `<div class="entry-desc">${multiline(item.description)}</div>` : ""}
+        </div>`).join(""))
+    : "";
+  const experienceHTML = experience.length
+    ? section("الخبرات العملية", experience.map((item) => `
+        <div class="entry">
+          <div class="entry-top">
+            <div>
+              <div class="entry-title">${text(item.jobTitle)}</div>
+              <div class="entry-sub">${text(item.company)}${item.location ? ` · ${text(item.location)}` : ""}</div>
+            </div>
+            <div class="entry-date">${text(item.startDate)}${item.startDate || item.endDate ? " – " : ""}${item.current ? "حتى الآن" : text(item.endDate)}</div>
+          </div>
+          ${item.description ? `<div class="entry-desc">${multiline(item.description)}</div>` : ""}
+        </div>`).join(""))
+    : "";
+  const skillsHTML = skills.length
+    ? section("المهارات", `<div class="tags">${skills.map((item) => `<span class="tag">${text(item.name)}</span>`).join("")}</div>`)
+    : "";
+  const languagesHTML = languages.length
+    ? section("اللغات", `<div class="tags">${languages.map((item) => `<span class="tag">${text(item.name)}${item.level ? ` · ${text(item.level)}` : ""}</span>`).join("")}</div>`)
+    : "";
+  const coursesHTML = courses.length
+    ? section("الدورات والشهادات", courses.map((item) => `
+        <div class="entry">
+          <div class="entry-top">
+            <div>
+              <div class="entry-title">${text(item.name)}</div>
+              ${item.provider ? `<div class="entry-sub">${text(item.provider)}${item.certificateId ? ` · ${text(item.certificateId)}` : ""}</div>` : ""}
+            </div>
+            ${item.date ? `<div class="entry-date">${text(item.date)}</div>` : ""}
+          </div>
+        </div>`).join(""))
+    : "";
 
-  const summaryHTML = b.p.summary ? section("الملخص المهني", `<p class="summary">${b.p.summary}</p>`) : "";
-  const expSection = b.hasExp ? section("الخبرات العملية", b.expHTML) : "";
-  const eduSection = b.hasEdu ? section("المؤهلات العلمية", b.eduHTML) : "";
-  const skillsSection = b.hasSkills ? section("المهارات", b.skillsHTML) : "";
-  const langsSection = b.hasLangs ? section("اللغات", b.langsHTML) : "";
-  const coursesSection = b.hasCourses ? section("الدورات والشهادات", b.coursesHTML) : "";
+  const corporate = template === "corporate";
+  const header = `
+    <header class="header">
+      <div class="name">${text(p.fullName)}</div>
+      ${p.jobTitle ? `<div class="job-title">${text(p.jobTitle)}</div>` : ""}
+      ${contacts ? `<div class="contact">${contacts}</div>` : ""}
+    </header>`;
+  const body = [summary, educationHTML, experienceHTML, skillsHTML, languagesHTML, coursesHTML]
+    .filter(Boolean)
+    .join("");
 
-  const headerInner = `
-    <div class="name">${b.p.fullName || ""}</div>
-    ${b.p.jobTitle ? `<div class="job-title">${b.p.jobTitle}</div>` : ""}
-    ${contactHTML}
-  `;
+  const templateStyles: Record<TemplateId, string> = {
+    ats: `
+      .page { padding: 16mm; }
+      .header { text-align: center; border-bottom: 2px solid #111; padding-bottom: 12px; }
+      .name { font-size: 23pt; font-weight: 800; }
+      .job-title { margin-top: 3px; font-size: 11pt; font-weight: 600; }
+      .contact { justify-content: center; margin-top: 7px; }
+      .section-title { display: flex; align-items: center; gap: 10px; }
+      .section-title::after { content: ""; flex: 1; height: 1px; background: #aaa; }
+    `,
+    modern: `
+      .page { padding: 16mm; }
+      .header { border-bottom: 2px solid #111; padding-bottom: 10px; }
+      .name { font-size: 25pt; font-weight: 800; }
+      .job-title { margin-top: 3px; font-size: 11pt; }
+      .section-title { border-right: 3px solid #111; padding-right: 8px; }
+      .tag { background: #111; color: #fff; }
+    `,
+    corporate: `
+      .page { padding: 0 0 14mm; }
+      .header { background: #111; color: #fff; padding: 16mm; }
+      .name { font-size: 25pt; font-weight: 800; }
+      .job-title { margin-top: 3px; color: #ddd; font-size: 11pt; }
+      .contact { color: #eee; margin-top: 8px; }
+      .content { padding: 4mm 16mm 0; }
+      .section-title { border-bottom: 2px solid #111; padding-bottom: 4px; }
+    `,
+    minimal: `
+      .page { padding: 19mm 18mm; }
+      .header { padding-bottom: 9px; border-bottom: 1px dashed #aaa; }
+      .name { font-size: 26pt; font-weight: 800; }
+      .job-title { margin-top: 3px; color: #555; font-size: 11pt; }
+      .section-title { color: #444; }
+      .tag { border-radius: 16px; }
+    `,
+  };
 
-  // Corporate has a different page structure (header outside .page padding)
-  if (templateId === "corporate") {
-    return `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"><title>السيرة الذاتية - ${b.p.fullName || ""}</title><style>${css}</style></head>
-<body>
-  <div class="page">
-    <div class="header">${headerInner}</div>
-    <div class="body">
-      <div class="content">${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}</div>
-    </div>
-  </div>
-</body>
-</html>`;
-  }
-
-  return `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"><title>السيرة الذاتية - ${b.p.fullName || ""}</title><style>${css}</style></head>
-<body>
-  <div class="page">
-    <div class="header">${headerInner}</div>
-    <div class="content">${summaryHTML}${expSection}${eduSection}${skillsSection}${langsSection}${coursesSection}</div>
-  </div>
-</body>
-</html>`;
+  return `<!doctype html>
+  <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>السيرة الذاتية - ${text(p.fullName)}</title>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
+        @page { size: A4; margin: 0; }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body { color: #111; background: #fff; font: 10.5pt/1.55 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .page { width: 210mm; min-height: 297mm; margin: 0 auto; display: flex; flex-direction: column; }
+        .header { flex: 0 0 auto; }
+        .name { line-height: 1.35; }
+        .contact { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; font-size: 9pt; color: #444; }
+        .content { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: space-evenly; gap: 7mm; padding-top: 5mm; }
+        .section { break-inside: avoid; page-break-inside: avoid; }
+        .section-title { margin: 0 0 6px; font-size: 10.5pt; font-weight: 700; }
+        .entry { margin-bottom: 7px; break-inside: avoid; page-break-inside: avoid; }
+        .entry:last-child { margin-bottom: 0; }
+        .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .entry-title { font-weight: 700; color: #111; }
+        .entry-sub { font-size: 9.5pt; color: #444; }
+        .entry-date { flex: 0 0 auto; white-space: nowrap; font-size: 9pt; color: #555; }
+        .entry-desc, .summary { margin: 4px 0 0; font-size: 9.8pt; line-height: 1.65; white-space: pre-line; }
+        .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+        .tag { display: inline-block; padding: 2px 9px; border: 1px solid #bbb; font-size: 9pt; border-radius: 3px; }
+        .contact-separator { color: #999; }
+        ${templateStyles[template]}
+        @media screen {
+          body { background: #eee; padding: 16px 0; }
+          .page { box-shadow: 0 2px 18px #0002; }
+        }
+        @media print {
+          body { background: #fff; }
+          .page { margin: 0; box-shadow: none; }
+        }
+      </style>
+    </head>
+    <body><main class="page">${header}<div class="content">${body}</div></main></body>
+  </html>`;
 }
 
-// ─── Bilingual HTML builder ────────────────────────────────────────────────────
-function buildBilingualHTML(cvData: CVData): string {
-  const { personalInfo: p, education, experience, skills, courses } = cvData;
-  if (!p.fullName && !p.fullNameEn && education.length === 0 && experience.length === 0) return "";
-
-  const css = bilingualCSS();
-
-  const bullets = (text: string) =>
-    text.split("\n").filter(l => l.trim()).map(line =>
-      `<div class="bil-bullet"><span>–</span><span>${line.replace(/^[•\-–]\s*/, "")}</span></div>`
-    ).join("");
-
-  const biSection = (arTitle: string, enTitle: string, arContent: string, enContent: string) => `
-    <div class="bil-section">
-      <div class="bil-sec-header">
-        <span class="bil-sec-en">${enTitle}</span>
-        <span class="bil-sec-ar">${arTitle}</span>
-      </div>
-      <div class="bil-cols">
-        <div class="bil-col-en">${enContent}</div>
-        <div class="bil-divider"></div>
-        <div class="bil-col-ar">${arContent}</div>
-      </div>
-    </div>`;
-
-  const contactItems = [
-    p.email && p.email,
-    p.phone && p.phone,
-    p.location && p.location,
-  ].filter(Boolean);
-
-  const contactBar = contactItems.length
-    ? `<div class="bil-contact">${contactItems.map(i => `<span>${i}</span>`).join("")}</div>`
-    : "";
-
-  const summarySection = (p.summary || p.summaryEn)
-    ? biSection(
-        "الهدف الوظيفي", "CAREER OBJECTIVE",
-        `<p style="line-height:1.75;color:#333;">${p.summary || ""}</p>`,
-        `<p style="line-height:1.75;color:#333;">${p.summaryEn || ""}</p>`
-      )
-    : "";
-
-  const eduAr = education.map(e => `
-    <div style="margin-bottom:8px;">
-      ${e.degree ? `<div class="bil-kv"><strong>المؤهل:</strong> ${e.degree}</div>` : ""}
-      ${e.field ? `<div class="bil-kv"><strong>التخصص:</strong> ${e.field}</div>` : ""}
-      ${e.institution ? `<div class="bil-kv"><strong>جهة التعليم:</strong> ${e.institution}</div>` : ""}
-      ${e.endDate ? `<div style="font-size:9pt;color:#666;">${e.endDate}</div>` : ""}
-    </div>`).join("");
-
-  const eduEn = education.map(e => `
-    <div style="margin-bottom:8px;">
-      ${(e.degreeEn || e.degree) ? `<div class="bil-kv"><strong>Degree:</strong> ${e.degreeEn || e.degree}</div>` : ""}
-      ${(e.fieldEn || e.field) ? `<div class="bil-kv"><strong>Major:</strong> ${e.fieldEn || e.field}</div>` : ""}
-      ${(e.institutionEn || e.institution) ? `<div class="bil-kv"><strong>Institution:</strong> ${e.institutionEn || e.institution}</div>` : ""}
-      ${e.endDate ? `<div style="font-size:9pt;color:#666;">${e.endDate}</div>` : ""}
-    </div>`).join("");
-
-  const eduSection = education.length
-    ? biSection("التعليم", "EDUCATION", eduAr, eduEn)
-    : "";
-
-  const expAr = experience.map(e => `
-    <div style="margin-bottom:8px;">
-      ${e.jobTitle ? `<div style="font-weight:700;margin-bottom:2px;">${e.jobTitle}${e.company ? " · " + e.company : ""}</div>` : ""}
-      ${e.description ? bullets(e.description) : ""}
-    </div>`).join("");
-
-  const expEn = experience.map(e => `
-    <div style="margin-bottom:8px;">
-      ${(e.jobTitleEn || e.jobTitle) ? `<div style="font-weight:700;margin-bottom:2px;">${e.jobTitleEn || e.jobTitle}${(e.companyEn || e.company) ? " · " + (e.companyEn || e.company) : ""}</div>` : ""}
-      ${(e.descriptionEn || e.description) ? bullets(e.descriptionEn || e.description) : ""}
-    </div>`).join("");
-
-  const expSection = experience.length
-    ? biSection("الخبرات", "EXPERIENCE", expAr, expEn)
-    : "";
-
-  const coursesAr = courses.map(c => `<div class="bil-bullet"><span>–</span><span>${c.name}</span></div>`).join("");
-  const coursesEn = courses.map(c => `<div class="bil-bullet"><span>–</span><span>${c.nameEn || c.name}</span></div>`).join("");
-  const coursesSection = courses.length
-    ? biSection("الدورات", "COURSES", coursesAr, coursesEn)
-    : "";
-
-  const skillsAr = skills.map(s => `<div class="bil-bullet"><span>–</span><span>${s.name}</span></div>`).join("");
-  const skillsEn = skills.map(s => `<div class="bil-bullet"><span>–</span><span>${s.nameEn || s.name}</span></div>`).join("");
-  const skillsSection = skills.length
-    ? biSection("المهارات", "SKILLS", skillsAr, skillsEn)
-    : "";
-
-  return `<!DOCTYPE html>
-<html lang="ar">
-<head><meta charset="UTF-8"><title>السيرة الذاتية - ${p.fullName || p.fullNameEn || ""}</title><style>${css}</style></head>
-<body>
-  <div class="page">
-    <div class="bil-header">
-      <div class="bil-name-en">${p.fullNameEn || ""}</div>
-      <div class="bil-name-ar">${p.fullName || ""}</div>
-    </div>
-    ${contactBar}
-    <div class="bil-content">
-      ${summarySection}
-      ${eduSection}
-      ${expSection}
-      ${coursesSection}
-      ${skillsSection}
-    </div>
-  </div>
-</body>
-</html>`;
-}
-
-// ─── Public API ────────────────────────────────────────────────────────────────
 export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
-  const html = templateId === "bilingual"
-    ? buildBilingualHTML(cvData)
-    : buildHTML(cvData, templateId);
-
+  const html = buildHTML(cvData, templateId);
   if (!html) {
     alert("الرجاء إدخال بياناتك أولاً قبل الحفظ.");
     return;
@@ -360,22 +183,15 @@ export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
   printWindow.document.write(html);
   printWindow.document.close();
 
-  printWindow.onload = () => {
-    printWindow.document.fonts.ready.then(() => {
-      setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-      }, 200);
-    });
+  let hasPrinted = false;
+  const print = () => {
+    if (hasPrinted || printWindow.closed) return;
+    hasPrinted = true;
+    printWindow.focus();
+    printWindow.print();
   };
-
-  // Fallback in case onload doesn't fire
-  setTimeout(() => {
-    try {
-      printWindow.document.fonts.ready.then(() => {
-        printWindow.focus();
-        printWindow.print();
-      });
-    } catch (_) {}
-  }, 3000);
+  printWindow.onload = () => {
+    void printWindow.document.fonts.ready.then(() => window.setTimeout(print, 150));
+  };
+  window.setTimeout(print, 3000);
 }

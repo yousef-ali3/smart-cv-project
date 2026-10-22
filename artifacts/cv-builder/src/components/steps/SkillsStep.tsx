@@ -14,19 +14,16 @@ function generateId() {
 const languageLevels: Language["level"][] = ["مبتدئ", "متوسط", "جيد", "ممتاز", "اللغة الأم"];
 
 export default function SkillsStep() {
-  const { cvData, updateCVData, cvLanguage } = useCVContext();
-  const isBilingual = cvLanguage === "bilingual";
+  const { cvData, updateCVData } = useCVContext();
   const [newSkill, setNewSkill] = useState("");
-  const [newSkillEn, setNewSkillEn] = useState("");
   const [newLang, setNewLang] = useState("");
   const [newLangLevel, setNewLangLevel] = useState<Language["level"]>("جيد");
 
   const addSkill = () => {
     if (!newSkill.trim()) return;
-    const skill: Skill = { id: generateId(), name: newSkill.trim(), nameEn: newSkillEn.trim() || undefined };
+    const skill: Skill = { id: generateId(), name: newSkill.trim() };
     updateCVData({ skills: [...cvData.skills, skill] });
     setNewSkill("");
-    setNewSkillEn("");
   };
 
   const deleteSkill = (id: string) => {
@@ -83,7 +80,7 @@ export default function SkillsStep() {
                 className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-muted text-foreground border border-border"
                 data-testid={`badge-skill-${skill.id}`}
               >
-                <span>{skill.name}{isBilingual && skill.nameEn ? ` / ${skill.nameEn}` : ""}</span>
+                <span>{skill.name}</span>
                 <button
                   onClick={() => deleteSkill(skill.id)}
                   className="mr-1 opacity-50 hover:opacity-100 transition-opacity"
@@ -94,37 +91,18 @@ export default function SkillsStep() {
               </div>
             ))}
           </div>
-          <div className={`flex gap-2 ${isBilingual ? "flex-col" : ""}`}>
-            <div className={`flex gap-2 ${isBilingual ? "w-full" : "flex-1"}`}>
-              <Input
-                placeholder="اسم المهارة (مثال: Python، Excel...)"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addSkill()}
-                className="flex-1"
-                data-testid="input-new-skill"
-              />
-              {!isBilingual && (
-                <Button onClick={addSkill} size="sm" data-testid="button-add-skill">
-                  <Plus className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-            {isBilingual && (
-              <div className="flex gap-2 w-full">
-                <Input
-                  placeholder="Skill in English (e.g. Python, Data Analysis...)"
-                  dir="ltr"
-                  value={newSkillEn}
-                  onChange={(e) => setNewSkillEn(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addSkill()}
-                  className="flex-1"
-                />
-                <Button onClick={addSkill} size="sm" data-testid="button-add-skill">
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
+          <div className="flex gap-2">
+            <Input
+              placeholder="اسم المهارة (مثال: Python، Excel...)"
+              value={newSkill}
+              onChange={(e) => setNewSkill(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addSkill()}
+              className="flex-1"
+              data-testid="input-new-skill"
+            />
+            <Button onClick={addSkill} size="sm" data-testid="button-add-skill">
+              <Plus className="w-4 h-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -242,18 +220,6 @@ export default function SkillsStep() {
                 </div>
               </div>
 
-              {/* English course name — bilingual only */}
-              {isBilingual && (
-                <div className="border-t pt-2 space-y-1">
-                  <Label className="text-xs">Course Name (English) <span className="text-muted-foreground font-normal">— اسم الدورة بالإنجليزية</span></Label>
-                  <Input
-                    placeholder="Cybersecurity, Fundamentals of Managing Tourism Events..."
-                    dir="ltr"
-                    value={course.nameEn || ""}
-                    onChange={(e) => updateCourse(course.id, { nameEn: e.target.value })}
-                  />
-                </div>
-              )}
             </div>
           ))}
           <Button

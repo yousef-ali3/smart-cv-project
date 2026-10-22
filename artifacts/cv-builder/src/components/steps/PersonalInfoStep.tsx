@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect, useRef } from "react";
-import { useCVContext, CvLanguage } from "@/context/CVContext";
+import { useCVContext } from "@/context/CVContext";
 import { PersonalInfo } from "@/types/cv";
 import {
   Form,
@@ -13,8 +13,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import ProfessionalSummary from "@/components/ProfessionalSummary";
 import {
   User,
@@ -44,8 +42,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function PersonalInfoStep() {
-  const { cvData, updateCVData, cvLanguage, setCvLanguage, selectedTemplate, setSelectedTemplate } = useCVContext();
-  const isBilingual = cvLanguage === "bilingual";
+  const { cvData, updateCVData } = useCVContext();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -61,7 +58,7 @@ export default function PersonalInfoStep() {
     },
   });
 
-  // Keep a ref to the latest personalInfo to avoid stale-closure overwriting English fields
+  // Keep a ref to the latest personalInfo so form updates never overwrite newer fields.
   const personalInfoRef = useRef(cvData.personalInfo);
   personalInfoRef.current = cvData.personalInfo;
 
@@ -71,10 +68,6 @@ export default function PersonalInfoStep() {
     });
     return () => subscription.unsubscribe();
   }, [form, updateCVData]);
-
-  const updateEnField = (field: Partial<PersonalInfo>) => {
-    updateCVData({ personalInfo: { ...personalInfoRef.current, ...field } });
-  };
 
   return (
     <div className="space-y-6">
@@ -87,41 +80,6 @@ export default function PersonalInfoStep() {
         </p>
       </div>
 
-      {/* Language selector — first thing the user sees */}
-      <div className="rounded-xl border border-border p-4 bg-muted/30 space-y-3">
-        <p className="text-sm font-semibold text-foreground">لغة السيرة الذاتية</p>
-        <div className="grid grid-cols-2 gap-3">
-          {(["ar", "bilingual"] as CvLanguage[]).map((lang) => {
-            const isSelected = cvLanguage === lang;
-            return (
-              <button
-                key={lang}
-                type="button"
-                onClick={() => {
-                  setCvLanguage(lang);
-                  if (lang === "bilingual" && selectedTemplate !== "bilingual") {
-                    setSelectedTemplate("bilingual");
-                  } else if (lang === "ar" && selectedTemplate === "bilingual") {
-                    setSelectedTemplate("ats");
-                  }
-                }}
-                className={`rounded-xl border-2 p-3 text-center transition-all cursor-pointer ${
-                  isSelected
-                    ? "border-black bg-black text-white"
-                    : "border-border hover:border-gray-400 bg-white text-foreground"
-                }`}
-              >
-                <div className="text-lg mb-0.5">{lang === "ar" ? "🇸🇦" : "🌐"}</div>
-                <div className="font-bold text-sm">{lang === "ar" ? "عربي فقط" : "عربي + إنجليزي"}</div>
-                <div className={`text-xs mt-0.5 ${isSelected ? "text-white/70" : "text-muted-foreground"}`}>
-                  {lang === "ar" ? "Arabic only" : "Bilingual"}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       <Form {...form}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField
@@ -131,7 +89,7 @@ export default function PersonalInfoStep() {
               <FormItem className="sm:col-span-2">
                 <FormLabel className="flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  {isBilingual ? "الاسم الكامل (عربي) *" : "الاسم الكامل *"}
+                  الاسم الكامل *
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -144,24 +102,6 @@ export default function PersonalInfoStep() {
               </FormItem>
             )}
           />
-
-          {/* English name — only when bilingual, full width row */}
-          {isBilingual && (
-            <div className="space-y-1 sm:col-span-2">
-              <Label className="flex items-center gap-2 text-sm font-medium">
-                <User className="w-4 h-4" />
-                Full Name (English)
-                <span className="text-xs text-muted-foreground font-normal">— الاسم بالإنجليزية</span>
-              </Label>
-              <Input
-                placeholder="First Last"
-                dir="ltr"
-                value={cvData.personalInfo.fullNameEn || ""}
-                onChange={(e) => updateEnField({ fullNameEn: e.target.value })}
-                data-testid="input-full-name-en"
-              />
-            </div>
-          )}
 
           <FormField
             control={form.control}
@@ -255,7 +195,7 @@ export default function PersonalInfoStep() {
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
                   <Linkedin className="w-4 h-4" />
-                  LinkedIn
+                  حساب لينكدإن
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -311,29 +251,6 @@ export default function PersonalInfoStep() {
         </div>
       </Form>
 
-      {/* English summary — only when bilingual */}
-      {isBilingual && (
-        <div className="border-t pt-4 space-y-2">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">English Fields</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-sm font-medium">
-              Career Objective (English)
-              <span className="text-xs text-muted-foreground font-normal mr-2">— الهدف الوظيفي بالإنجليزية</span>
-            </Label>
-            <Textarea
-              placeholder="I aspire to join your esteemed organization to contribute my knowledge and professional services..."
-              dir="ltr"
-              className="min-h-[100px] resize-none text-sm"
-              value={cvData.personalInfo.summaryEn || ""}
-              onChange={(e) => updateEnField({ summaryEn: e.target.value })}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

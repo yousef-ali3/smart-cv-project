@@ -108,7 +108,7 @@
   --chart-4: 0 0% 70%;
   --chart-5: 0 0% 85%;
 
-  --app-font-sans: 'Inter', sans-serif;
+  --app-font-sans: 'Noto Sans Arabic', 'Segoe UI', Arial, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: .5rem;

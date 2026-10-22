@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import { CVData, defaultCVData } from "@/types/cv";
 
-export type TemplateId = "ats" | "modern" | "corporate" | "minimal" | "bilingual";
-export type CvLanguage = "ar" | "bilingual";
+export type TemplateId = "ats" | "modern" | "corporate" | "minimal";
 
 interface CVContextType {
   cvData: CVData;
@@ -11,8 +10,6 @@ interface CVContextType {
   setCurrentStep: (step: number) => void;
   selectedTemplate: TemplateId;
   setSelectedTemplate: (t: TemplateId) => void;
-  cvLanguage: CvLanguage;
-  setCvLanguage: (l: CvLanguage) => void;
 }
 
 const CVContext = createContext<CVContextType | undefined>(undefined);
@@ -21,14 +18,13 @@ export function CVProvider({ children }: { children: React.ReactNode }) {
   const [cvData, setCvData] = useState<CVData>(defaultCVData);
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("ats");
-  const [cvLanguage, setCvLanguage] = useState<CvLanguage>("ar");
 
   const updateCVData = useCallback((data: Partial<CVData>) => {
     setCvData((prev) => ({ ...prev, ...data }));
   }, []);
 
   return (
-    <CVContext.Provider value={{ cvData, updateCVData, currentStep, setCurrentStep, selectedTemplate, setSelectedTemplate, cvLanguage, setCvLanguage }}>
+    <CVContext.Provider value={{ cvData, updateCVData, currentStep, setCurrentStep, selectedTemplate, setSelectedTemplate }}>
       {children}
     </CVContext.Provider>
   );

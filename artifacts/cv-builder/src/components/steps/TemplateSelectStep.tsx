@@ -4,7 +4,6 @@ import { Check } from "lucide-react";
 const arOnlyTemplates: {
   id: TemplateId;
   name: string;
-  nameEn: string;
   badge?: string;
   advantages: string[];
   preview: React.ReactNode;
@@ -12,7 +11,6 @@ const arOnlyTemplates: {
   {
     id: "ats",
     name: "الاحترافي ATS",
-    nameEn: "ATS Classic",
     badge: "مثالي للتوظيف",
     advantages: [
       "متوافق 100% مع أنظمة التوظيف الآلي",
@@ -46,7 +44,6 @@ const arOnlyTemplates: {
   {
     id: "modern",
     name: "العصري",
-    nameEn: "Modern",
     advantages: [
       "تصميم حديث وأنيق يلفت الانتباه",
       "مناسب لشركات التقنية والإبداع",
@@ -76,7 +73,6 @@ const arOnlyTemplates: {
   {
     id: "corporate",
     name: "المؤسسي",
-    nameEn: "Corporate",
     advantages: [
       "مظهر رسمي يناسب القطاع الحكومي والمالي",
       "يُعطي انطباعاً أولياً قوياً",
@@ -109,7 +105,6 @@ const arOnlyTemplates: {
   {
     id: "minimal",
     name: "البسيط الأنيق",
-    nameEn: "Minimal",
     advantages: [
       "تصميم بسيط يُركز على المحتوى",
       "مريح للعين وسهل القراءة",
@@ -143,53 +138,9 @@ const arOnlyTemplates: {
   },
 ];
 
-const bilingualTemplate = {
-  id: "bilingual" as TemplateId,
-  name: "ثنائي اللغة",
-  nameEn: "Bilingual",
-  badge: "عربي + إنجليزي",
-  advantages: [
-    "عربي على اليمين وإنجليزي على اليسار",
-    "مثالي للتقديم في الشركات الدولية",
-    "يُبرز كفاءتك اللغوية بشكل احترافي",
-    "تصميم متوازن وأنيق",
-  ],
-  preview: (
-    <div className="w-full h-full bg-white p-2">
-      <div className="flex justify-between items-end mb-1.5 pb-1 border-b border-gray-300">
-        <div className="h-2 bg-gray-900 rounded w-16" />
-        <div className="h-2 bg-gray-900 rounded w-16" />
-      </div>
-      <div className="h-3 bg-gray-200 rounded mb-1.5 w-full" />
-      {[["EXPERIENCE", "الخبرات"], ["EDUCATION", "التعليم"], ["SKILLS", "المهارات"]].map(([en, ar]) => (
-        <div key={en} className="mb-1.5">
-          <div className="flex justify-between items-center pb-0.5 mb-0.5 border-b border-gray-400">
-            <div className="h-1 bg-gray-700 rounded w-10" />
-            <div className="h-1 bg-gray-700 rounded w-10" />
-          </div>
-          <div className="flex gap-1">
-            <div className="flex-1 space-y-0.5">
-              <div className="h-0.5 bg-gray-200 rounded w-full" />
-              <div className="h-0.5 bg-gray-200 rounded w-3/4" />
-            </div>
-            <div className="w-px bg-gray-200" />
-            <div className="flex-1 space-y-0.5">
-              <div className="h-0.5 bg-gray-200 rounded w-full" />
-              <div className="h-0.5 bg-gray-200 rounded w-3/4" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  ),
-};
-
 export default function TemplateSelectStep() {
-  const { selectedTemplate, setSelectedTemplate, cvLanguage } = useCVContext();
-
-  const templates = cvLanguage === "bilingual"
-    ? [bilingualTemplate]
-    : arOnlyTemplates;
+  const { selectedTemplate, setSelectedTemplate } = useCVContext();
+  const templates = arOnlyTemplates;
 
   return (
     <div className="space-y-6">
@@ -197,13 +148,6 @@ export default function TemplateSelectStep() {
         <h2 className="text-xl font-bold text-foreground mb-1">اختيار القالب</h2>
         <p className="text-sm text-muted-foreground">اختر القالب الذي يناسبك — المعاينة تتحدث فوراً</p>
       </div>
-
-      {cvLanguage === "bilingual" && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
-          <span>🌐</span>
-          <span>تم اختيار اللغتين العربية والإنجليزية — القالب الثنائي متاح فقط</span>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {templates.map((t) => {
@@ -232,7 +176,6 @@ export default function TemplateSelectStep() {
                 <div className="p-3">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-bold text-sm text-foreground">{t.name}</h3>
-                    <span className="text-[10px] text-muted-foreground">{t.nameEn}</span>
                   </div>
                   <ul className="space-y-1">
                     {t.advantages.map((adv, i) => (
