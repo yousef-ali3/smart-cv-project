@@ -63,6 +63,7 @@ function EducationCard({
             <div className="space-y-1">
               <Label className="text-xs">الدرجة العلمية / المؤهل *</Label>
               <Input
+                dir="auto"
                 placeholder="بكالوريوس، ماجستير، دبلوم..."
                 value={edu.degree}
                 onChange={(e) => onUpdate(edu.id, { degree: e.target.value })}
@@ -72,6 +73,7 @@ function EducationCard({
             <div className="space-y-1">
               <Label className="text-xs">التخصص</Label>
               <Input
+                dir="auto"
                 placeholder="هندسة الحاسوب، إدارة الأعمال..."
                 value={edu.field}
                 onChange={(e) => onUpdate(edu.id, { field: e.target.value })}
@@ -81,6 +83,7 @@ function EducationCard({
             <div className="sm:col-span-2 space-y-1">
               <Label className="text-xs">الجامعة / المؤسسة التعليمية *</Label>
               <Input
+                dir="auto"
                 placeholder="جامعة الملك سعود"
                 value={edu.institution}
                 onChange={(e) => onUpdate(edu.id, { institution: e.target.value })}
@@ -90,6 +93,7 @@ function EducationCard({
             <div className="space-y-1">
               <Label className="text-xs">سنة التخرج</Label>
               <Input
+                dir="auto"
                 placeholder="مثال: 2022"
                 value={edu.endDate}
                 onChange={(e) => onUpdate(edu.id, { endDate: e.target.value })}
@@ -99,6 +103,7 @@ function EducationCard({
             <div className="space-y-1">
               <Label className="text-xs">المعدل التراكمي (اختياري)</Label>
               <Input
+                dir="ltr"
                 placeholder="4.5 / 5.0"
                 value={edu.gpa}
                 onChange={(e) => onUpdate(edu.id, { gpa: e.target.value })}
@@ -109,6 +114,7 @@ function EducationCard({
           <div className="space-y-1">
             <Label className="text-xs">تفاصيل إضافية (اختياري)</Label>
             <Textarea
+              dir="auto"
               placeholder="الأنشطة، الإنجازات، المشاريع..."
               className="min-h-[70px] resize-none text-sm"
               value={edu.description}

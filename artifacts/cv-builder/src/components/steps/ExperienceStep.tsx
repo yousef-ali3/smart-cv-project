@@ -63,6 +63,7 @@ function ExperienceCard({
             <div className="space-y-1">
               <Label className="text-xs">المسمى الوظيفي *</Label>
               <Input
+                dir="auto"
                 placeholder="مطور برمجيات أول"
                 value={exp.jobTitle}
                 onChange={(e) => onUpdate(exp.id, { jobTitle: e.target.value })}
@@ -72,6 +73,7 @@ function ExperienceCard({
             <div className="space-y-1">
               <Label className="text-xs">اسم الشركة / المؤسسة *</Label>
               <Input
+                dir="auto"
                 placeholder="شركة أرامكو السعودية"
                 value={exp.company}
                 onChange={(e) => onUpdate(exp.id, { company: e.target.value })}
@@ -81,6 +83,7 @@ function ExperienceCard({
             <div className="space-y-1">
               <Label className="text-xs">الموقع</Label>
               <Input
+                dir="auto"
                 placeholder="الرياض، السعودية"
                 value={exp.location}
                 onChange={(e) => onUpdate(exp.id, { location: e.target.value })}
@@ -90,6 +93,7 @@ function ExperienceCard({
             <div className="space-y-1">
               <Label className="text-xs">تاريخ البداية</Label>
               <Input
+                dir="auto"
                 placeholder="يناير 2020"
                 value={exp.startDate}
                 onChange={(e) => onUpdate(exp.id, { startDate: e.target.value })}
@@ -100,6 +104,7 @@ function ExperienceCard({
               <Label className="text-xs">تاريخ الانتهاء</Label>
               <div className="flex items-center gap-2">
                 <Input
+                  dir="auto"
                   placeholder="ديسمبر 2023"
                   value={exp.current ? "حتى الآن" : exp.endDate}
                   disabled={exp.current}
@@ -124,6 +129,7 @@ function ExperienceCard({
           <div className="space-y-1">
             <Label className="text-xs">المهام والإنجازات</Label>
             <Textarea
+              dir="auto"
               placeholder={`• قيادة فريق تقني من 5 مطورين\n• تطوير منصة إلكترونية زادت المبيعات بنسبة 30%\n• تحسين أداء قاعدة البيانات بنسبة 40%`}
               className="min-h-[100px] resize-none text-sm"
               value={exp.description}

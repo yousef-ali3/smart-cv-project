@@ -2,6 +2,13 @@ import type { CSSProperties, ReactNode } from "react";
 import { useCVContext } from "@/context/CVContext";
 import type { CVData } from "@/types/cv";
 
+const hasText = (...values: Array<string | undefined>) =>
+  values.some((value) => Boolean(value?.trim()));
+
+function BidiText({ children }: { children: ReactNode }) {
+  return <bdi dir="auto" style={{ unicodeBidi: "isolate" }}>{children}</bdi>;
+}
+
 function EmptyState() {
   return (
     <div className="flex min-h-[420px] flex-col items-center justify-center py-20 text-center text-muted-foreground">
@@ -50,25 +57,44 @@ function Section({
 
 function CVDocument({ data, template }: { data: CVData; template: string }) {
   const { personalInfo: p, education, experience, skills, courses, languages } = data;
+  const visibleEducation = education.filter((item) =>
+    hasText(item.degree, item.field, item.institution, item.endDate, item.gpa, item.description),
+  );
+  const visibleExperience = experience.filter((item) =>
+    hasText(item.jobTitle, item.company, item.location, item.startDate, item.endDate, item.description),
+  );
+  const visibleSkills = skills.filter((item) => hasText(item.name));
+  const visibleCourses = courses.filter((item) =>
+    hasText(item.name, item.provider, item.date, item.certificateId),
+  );
+  const visibleLanguages = languages.filter((item) => hasText(item.name, item.level));
   const isCorporate = template === "corporate";
-  const contacts = [p.email, p.phone, p.location, p.linkedin, p.website].filter(Boolean);
+  const contacts = [
+    { value: p.email, dir: "ltr" },
+    { value: p.phone, dir: "ltr" },
+    { value: p.location, dir: "auto" },
+    { value: p.linkedin, dir: "ltr" },
+    { value: p.website, dir: "ltr" },
+  ].filter(({ value }) => hasText(value));
 
   const pageStyle: CSSProperties = {
-    fontFamily: "'Noto Sans Arabic', Arial, sans-serif",
+    fontFamily: "Arial, Tahoma, 'Segoe UI', system-ui, sans-serif",
     direction: "rtl",
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
-    padding: template === "minimal" ? "16mm 18mm 6mm" : template === "corporate" ? "0 0 6mm" : "14mm 16mm 6mm",
+    width: "100%",
+    aspectRatio: "210 / 297",
+    padding: template === "minimal" ? "28px 24px 16px" : template === "corporate" ? "0 0 16px" : "24px 22px 16px",
     background: "#fff",
     color: "#111",
     fontSize: 10,
-    lineHeight: 1.55,
+    lineHeight: 1.5,
   };
 
   const headerStyle: CSSProperties = {
     flex: "0 0 auto",
-    padding: isCorporate ? "16mm" : template === "ats" ? "0 0 12px" : "0 0 10px",
+    padding: isCorporate ? "28px 24px" : template === "ats" ? "0 0 10px" : "0 0 9px",
     marginBottom: 2,
     textAlign: template === "ats" ? "center" : "right",
     background: isCorporate ? "#111" : "#fff",
@@ -77,71 +103,69 @@ function CVDocument({ data, template }: { data: CVData; template: string }) {
   };
 
   const sections: { title: string; content: ReactNode }[] = [];
-  if (p.summary) {
+  if (hasText(p.summary)) {
     sections.push({
       title: "الملخص المهني",
-      content: <p style={{ margin: 0, fontSize: 10, lineHeight: 1.7, whiteSpace: "pre-line", color: "#333" }}>{p.summary}</p>,
+      content: <p dir="auto" style={{ margin: 0, fontSize: 10, lineHeight: 1.6, whiteSpace: "pre-line", color: "#333" }}><BidiText>{p.summary}</BidiText></p>,
     });
   }
-  if (education.length) {
-    sections.push({
-      title: "المؤهلات العلمية",
-      content: education.map((item) => (
-        <div key={item.id} style={{ marginBottom: 8, breakInside: "avoid" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700 }}>{item.degree}{item.field ? ` في ${item.field}` : ""}</div>
-              <div style={{ fontSize: 9.5, color: "#444" }}>{item.institution}{item.gpa ? ` · المعدل: ${item.gpa}` : ""}</div>
-            </div>
-            {item.endDate && <div style={{ whiteSpace: "nowrap", fontSize: 9, color: "#555" }}>{item.endDate}</div>}
-          </div>
-          {item.description && <p style={{ margin: "3px 0 0", fontSize: 9.5, whiteSpace: "pre-line" }}>{item.description}</p>}
-        </div>
-      )),
-    });
-  }
-  if (experience.length) {
+  if (visibleExperience.length) {
     sections.push({
       title: "الخبرات العملية",
-      content: experience.map((item) => (
+      content: visibleExperience.map((item) => (
         <div key={item.id} style={{ marginBottom: 8, breakInside: "avoid" }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700 }}>{item.jobTitle}</div>
-              <div style={{ fontSize: 9.5, color: "#444" }}>{item.company}{item.location ? ` · ${item.location}` : ""}</div>
+              {hasText(item.jobTitle) && <div dir="auto" style={{ fontSize: 11, fontWeight: 700 }}><BidiText>{item.jobTitle}</BidiText></div>}
+              {hasText(item.company, item.location) && <div dir="auto" style={{ fontSize: 9.5, color: "#444" }}><BidiText>{item.company}</BidiText>{hasText(item.location) && <> · <BidiText>{item.location}</BidiText></>}</div>}
             </div>
-            <div style={{ whiteSpace: "nowrap", fontSize: 9, color: "#555" }}>
-              {item.startDate}{item.startDate || item.endDate ? " – " : ""}{item.current ? "حتى الآن" : item.endDate}
-            </div>
+            {hasText(item.startDate, item.endDate) && <div dir="auto" style={{ whiteSpace: "nowrap", fontSize: 9, color: "#555" }}><BidiText>{item.startDate}{item.startDate || item.endDate ? " – " : ""}{item.current ? "حتى الآن" : item.endDate}</BidiText></div>}
           </div>
-          {item.description && <p style={{ margin: "3px 0 0", fontSize: 9.5, lineHeight: 1.65, whiteSpace: "pre-line" }}>{item.description}</p>}
+          {hasText(item.description) && <p dir="auto" style={{ margin: "3px 0 0", fontSize: 9.5, lineHeight: 1.55, whiteSpace: "pre-line" }}><BidiText>{item.description}</BidiText></p>}
         </div>
       )),
     });
   }
-  if (skills.length) {
+  if (visibleEducation.length) {
+    sections.push({
+      title: "المؤهلات العلمية",
+      content: visibleEducation.map((item) => (
+        <div key={item.id} style={{ marginBottom: 8, breakInside: "avoid" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+            <div>
+              {hasText(item.degree, item.field) && <div dir="auto" style={{ fontSize: 11, fontWeight: 700 }}><BidiText>{item.degree}{hasText(item.field) ? ` في ${item.field}` : ""}</BidiText></div>}
+              {hasText(item.institution, item.gpa) && <div dir="auto" style={{ fontSize: 9.5, color: "#444" }}><BidiText>{item.institution}{hasText(item.gpa) ? ` · المعدل: ${item.gpa}` : ""}</BidiText></div>}
+            </div>
+            {hasText(item.endDate) && <div dir="auto" style={{ whiteSpace: "nowrap", fontSize: 9, color: "#555" }}><BidiText>{item.endDate}</BidiText></div>}
+          </div>
+          {hasText(item.description) && <p dir="auto" style={{ margin: "3px 0 0", fontSize: 9.5, lineHeight: 1.55, whiteSpace: "pre-line" }}><BidiText>{item.description}</BidiText></p>}
+        </div>
+      )),
+    });
+  }
+  if (visibleSkills.length) {
     sections.push({
       title: "المهارات",
-      content: <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{skills.map((item) => (
-        <span key={item.id} style={{ border: "1px solid #bbb", borderRadius: template === "minimal" ? 16 : 3, padding: "2px 9px", fontSize: 9, background: template === "modern" ? "#111" : "#f7f7f7", color: template === "modern" ? "#fff" : "#222" }}>{item.name}</span>
+      content: <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{visibleSkills.map((item) => (
+        <span key={item.id} dir="auto" style={{ border: "1px solid #bbb", borderRadius: template === "minimal" ? 16 : 3, padding: "2px 8px", fontSize: 9, background: template === "modern" ? "#111" : "#f7f7f7", color: template === "modern" ? "#fff" : "#222" }}><BidiText>{item.name}</BidiText></span>
       ))}</div>,
     });
   }
-  if (languages.length) {
+  if (visibleLanguages.length) {
     sections.push({
       title: "اللغات",
-      content: <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>{languages.map((item) => (
-        <span key={item.id}><strong>{item.name}</strong>{item.level ? ` · ${item.level}` : ""}</span>
+      content: <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>{visibleLanguages.map((item) => (
+        <span key={item.id} dir="auto"><strong><BidiText>{item.name}</BidiText></strong>{hasText(item.level) && <> · <BidiText>{item.level}</BidiText></>}</span>
       ))}</div>,
     });
   }
-  if (courses.length) {
+  if (visibleCourses.length) {
     sections.push({
       title: "الدورات والشهادات",
-      content: courses.map((item) => (
+      content: visibleCourses.map((item) => (
         <div key={item.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 5, breakInside: "avoid" }}>
-          <div><div style={{ fontWeight: 600 }}>{item.name}</div>{item.provider && <div style={{ fontSize: 9, color: "#555" }}>{item.provider}{item.certificateId ? ` · ${item.certificateId}` : ""}</div>}</div>
-          {item.date && <div style={{ whiteSpace: "nowrap", fontSize: 9, color: "#555" }}>{item.date}</div>}
+          <div>{hasText(item.name) && <div dir="auto" style={{ fontWeight: 600 }}><BidiText>{item.name}</BidiText></div>}{hasText(item.provider, item.certificateId) && <div dir="auto" style={{ fontSize: 9, color: "#555" }}><BidiText>{item.provider}</BidiText>{hasText(item.certificateId) && <> · <BidiText>{item.certificateId}</BidiText></>}</div>}</div>
+          {hasText(item.date) && <div dir="auto" style={{ whiteSpace: "nowrap", fontSize: 9, color: "#555" }}><BidiText>{item.date}</BidiText></div>}
         </div>
       )),
     });
@@ -150,23 +174,23 @@ function CVDocument({ data, template }: { data: CVData; template: string }) {
   return (
     <div id="cv-preview" style={pageStyle}>
       <header style={headerStyle}>
-        <div style={{ fontSize: template === "minimal" ? 25 : 23, lineHeight: 1.4, fontWeight: 800 }}>{p.fullName}</div>
-        {p.jobTitle && <div style={{ fontSize: 11, marginTop: 3, color: isCorporate ? "#ddd" : "#444", fontWeight: 600 }}>{p.jobTitle}</div>}
+        {hasText(p.fullName) && <div dir="auto" style={{ fontSize: template === "minimal" ? 25 : 23, lineHeight: 1.4, fontWeight: 800 }}><BidiText>{p.fullName}</BidiText></div>}
+        {hasText(p.jobTitle) && <div dir="auto" style={{ fontSize: 11, marginTop: 3, color: isCorporate ? "#ddd" : "#444", fontWeight: 600 }}><BidiText>{p.jobTitle}</BidiText></div>}
         {contacts.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", justifyContent: template === "ats" ? "center" : "flex-start", gap: "3px 8px", marginTop: 7, fontSize: 8.5, color: isCorporate ? "#eee" : "#444" }}>
-            {contacts.map((contact, index) => (
-              <span key={`${contact}-${index}`}>{index > 0 && <span aria-hidden="true" style={{ marginLeft: 8, color: "#999" }}>|</span>}{contact}</span>
+            {contacts.map(({ value, dir }, index) => (
+              <span key={`${value}-${index}`} dir={dir} style={{ unicodeBidi: "isolate" }}>{index > 0 && <span aria-hidden="true" style={{ marginLeft: 8, color: "#999" }}>|</span>}{value}</span>
             ))}
           </div>
         )}
       </header>
       <div style={{
-        flex: "1 0 auto",
+        flex: "0 0 auto",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
-        gap: 12,
-        padding: template === "corporate" ? "4px 16mm 0" : "8px 0 0",
+        gap: 10,
+        padding: template === "corporate" ? "4px 24px 0" : "7px 0 0",
       }}>
         {sections.map((item) => (
           <Section key={item.title} title={item.title} template={template}>{item.content}</Section>
@@ -180,8 +204,12 @@ export default function CVPreview() {
   const { cvData, selectedTemplate } = useCVContext();
   const { personalInfo, education, experience, skills, courses, languages } = cvData;
   const hasContent = Boolean(
-    personalInfo.fullName || personalInfo.email || personalInfo.phone ||
-    education.length || experience.length || skills.length || courses.length || languages.length,
+    hasText(personalInfo.fullName, personalInfo.jobTitle, personalInfo.email, personalInfo.phone, personalInfo.location, personalInfo.website, personalInfo.linkedin, personalInfo.summary) ||
+    education.some((item) => hasText(item.degree, item.field, item.institution, item.endDate, item.gpa, item.description)) ||
+    experience.some((item) => hasText(item.jobTitle, item.company, item.location, item.startDate, item.endDate, item.description)) ||
+    skills.some((item) => hasText(item.name)) ||
+    courses.some((item) => hasText(item.name, item.provider, item.date, item.certificateId)) ||
+    languages.some((item) => hasText(item.name, item.level)),
   );
 
   if (!hasContent) return <EmptyState />;

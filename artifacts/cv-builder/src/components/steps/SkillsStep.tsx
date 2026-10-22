@@ -93,6 +93,7 @@ export default function SkillsStep() {
           </div>
           <div className="flex gap-2">
             <Input
+              dir="auto"
               placeholder="اسم المهارة (مثال: Python، Excel...)"
               value={newSkill}
               onChange={(e) => setNewSkill(e.target.value)}
@@ -137,6 +138,7 @@ export default function SkillsStep() {
           </div>
           <div className="flex gap-2">
             <Input
+              dir="auto"
               placeholder="اللغة (مثال: العربية، الإنجليزية...)"
               value={newLang}
               onChange={(e) => setNewLang(e.target.value)}
@@ -174,6 +176,7 @@ export default function SkillsStep() {
                 <div className="space-y-1">
                   <Label className="text-xs">اسم الدورة / الشهادة</Label>
                   <Input
+                    dir="auto"
                     placeholder="دورة PMP، شهادة AWS..."
                     value={course.name}
                     onChange={(e) => updateCourse(course.id, { name: e.target.value })}
@@ -183,6 +186,7 @@ export default function SkillsStep() {
                 <div className="space-y-1">
                   <Label className="text-xs">جهة الإصدار</Label>
                   <Input
+                    dir="auto"
                     placeholder="Coursera، PMI، Google..."
                     value={course.provider}
                     onChange={(e) => updateCourse(course.id, { provider: e.target.value })}
@@ -192,6 +196,7 @@ export default function SkillsStep() {
                 <div className="space-y-1">
                   <Label className="text-xs">تاريخ الحصول</Label>
                   <Input
+                    dir="auto"
                     placeholder="مارس 2023"
                     value={course.date}
                     onChange={(e) => updateCourse(course.id, { date: e.target.value })}
@@ -202,6 +207,7 @@ export default function SkillsStep() {
                   <div className="flex-1 space-y-1">
                     <Label className="text-xs">رقم الشهادة (اختياري)</Label>
                     <Input
+                      dir="ltr"
                       placeholder="CERT-12345"
                       value={course.certificateId}
                       onChange={(e) => updateCourse(course.id, { certificateId: e.target.value })}

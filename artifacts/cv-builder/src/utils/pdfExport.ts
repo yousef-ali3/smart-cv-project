@@ -17,77 +17,107 @@ function section(title: string, content: string) {
   return `<section class="section"><h2 class="section-title">${title}</h2>${content}</section>`;
 }
 
-function buildHTML(cvData: CVData, template: TemplateId) {
-  const { personalInfo: p, education, experience, skills, courses, languages } = cvData;
-  if (!p.fullName && !p.email && !education.length && !experience.length) return "";
+const hasText = (...values: Array<string | undefined>) =>
+  values.some((value) => Boolean(value?.trim()));
+const bidi = (value?: string) => `<bdi dir="auto">${text(value)}</bdi>`;
+const bidiMultiline = (value?: string) =>
+  `<bdi dir="auto">${multiline(value)}</bdi>`;
 
-  const contacts = [p.email, p.phone, p.location, p.linkedin, p.website]
-    .filter(Boolean)
-    .map((item) => `<span>${text(item)}</span>`)
+export function buildCVHtml(cvData: CVData, template: TemplateId) {
+  const { personalInfo: p, education, experience, skills, courses, languages } = cvData;
+  const visibleEducation = education.filter((item) =>
+    hasText(item.degree, item.field, item.institution, item.endDate, item.gpa, item.description),
+  );
+  const visibleExperience = experience.filter((item) =>
+    hasText(item.jobTitle, item.company, item.location, item.startDate, item.endDate, item.description),
+  );
+  const visibleSkills = skills.filter((item) => hasText(item.name));
+  const visibleCourses = courses.filter((item) =>
+    hasText(item.name, item.provider, item.date, item.certificateId),
+  );
+  const visibleLanguages = languages.filter((item) => hasText(item.name, item.level));
+
+  if (
+    !hasText(p.fullName, p.jobTitle, p.email, p.phone, p.location, p.linkedin, p.website, p.summary) &&
+    !visibleEducation.length &&
+    !visibleExperience.length &&
+    !visibleSkills.length &&
+    !visibleCourses.length &&
+    !visibleLanguages.length
+  ) return "";
+
+  const contacts = [
+    { value: p.email, dir: "ltr" },
+    { value: p.phone, dir: "ltr" },
+    { value: p.location, dir: "auto" },
+    { value: p.linkedin, dir: "ltr" },
+    { value: p.website, dir: "ltr" },
+  ]
+    .filter(({ value }) => hasText(value))
+    .map(({ value, dir }) => `<span dir="${dir}">${text(value)}</span>`)
     .join('<span class="contact-separator" aria-hidden="true">|</span>');
 
-  const summary = p.summary
-    ? section("الملخص المهني", `<p class="summary">${multiline(p.summary)}</p>`)
+  const summary = hasText(p.summary)
+    ? section("الملخص المهني", `<p class="summary" dir="auto">${bidiMultiline(p.summary)}</p>`)
     : "";
-  const educationHTML = education.length
-    ? section("المؤهلات العلمية", education.map((item) => `
+  const experienceHTML = visibleExperience.length
+    ? section("الخبرات العملية", visibleExperience.map((item) => `
         <div class="entry">
           <div class="entry-top">
             <div>
-              <div class="entry-title">${text(item.degree)}${item.field ? ` في ${text(item.field)}` : ""}</div>
-              <div class="entry-sub">${text(item.institution)}${item.gpa ? ` · المعدل: ${text(item.gpa)}` : ""}</div>
+              <div class="entry-title" dir="auto">${bidi(item.jobTitle)}</div>
+              ${hasText(item.company, item.location) ? `<div class="entry-sub" dir="auto">${bidi(item.company)}${hasText(item.location) ? ` · ${bidi(item.location)}` : ""}</div>` : ""}
             </div>
-            ${item.endDate ? `<div class="entry-date">${text(item.endDate)}</div>` : ""}
+            ${hasText(item.startDate, item.endDate) ? `<div class="entry-date" dir="auto">${bidi(item.startDate)}${hasText(item.startDate, item.endDate) ? " – " : ""}${item.current ? "حتى الآن" : bidi(item.endDate)}</div>` : ""}
           </div>
-          ${item.description ? `<div class="entry-desc">${multiline(item.description)}</div>` : ""}
+          ${hasText(item.description) ? `<div class="entry-desc" dir="auto">${bidiMultiline(item.description)}</div>` : ""}
         </div>`).join(""))
     : "";
-  const experienceHTML = experience.length
-    ? section("الخبرات العملية", experience.map((item) => `
+  const educationHTML = visibleEducation.length
+    ? section("المؤهلات العلمية", visibleEducation.map((item) => `
         <div class="entry">
           <div class="entry-top">
             <div>
-              <div class="entry-title">${text(item.jobTitle)}</div>
-              <div class="entry-sub">${text(item.company)}${item.location ? ` · ${text(item.location)}` : ""}</div>
+              ${hasText(item.degree, item.field) ? `<div class="entry-title" dir="auto">${bidi(item.degree)}${hasText(item.field) ? ` في ${bidi(item.field)}` : ""}</div>` : ""}
+              ${hasText(item.institution, item.gpa) ? `<div class="entry-sub" dir="auto">${bidi(item.institution)}${hasText(item.gpa) ? ` · المعدل: ${bidi(item.gpa)}` : ""}</div>` : ""}
             </div>
-            <div class="entry-date">${text(item.startDate)}${item.startDate || item.endDate ? " – " : ""}${item.current ? "حتى الآن" : text(item.endDate)}</div>
+            ${hasText(item.endDate) ? `<div class="entry-date" dir="auto">${bidi(item.endDate)}</div>` : ""}
           </div>
-          ${item.description ? `<div class="entry-desc">${multiline(item.description)}</div>` : ""}
+          ${hasText(item.description) ? `<div class="entry-desc" dir="auto">${bidiMultiline(item.description)}</div>` : ""}
         </div>`).join(""))
     : "";
-  const skillsHTML = skills.length
-    ? section("المهارات", `<div class="tags">${skills.map((item) => `<span class="tag">${text(item.name)}</span>`).join("")}</div>`)
+  const skillsHTML = visibleSkills.length
+    ? section("المهارات", `<div class="tags">${visibleSkills.map((item) => `<span class="tag" dir="auto">${bidi(item.name)}</span>`).join("")}</div>`)
     : "";
-  const languagesHTML = languages.length
-    ? section("اللغات", `<div class="tags">${languages.map((item) => `<span class="tag">${text(item.name)}${item.level ? ` · ${text(item.level)}` : ""}</span>`).join("")}</div>`)
+  const languagesHTML = visibleLanguages.length
+    ? section("اللغات", `<div class="tags">${visibleLanguages.map((item) => `<span class="tag" dir="auto">${bidi(item.name)}${hasText(item.level) ? ` · ${bidi(item.level)}` : ""}</span>`).join("")}</div>`)
     : "";
-  const coursesHTML = courses.length
-    ? section("الدورات والشهادات", courses.map((item) => `
+  const coursesHTML = visibleCourses.length
+    ? section("الدورات والشهادات", visibleCourses.map((item) => `
         <div class="entry">
           <div class="entry-top">
             <div>
-              <div class="entry-title">${text(item.name)}</div>
-              ${item.provider ? `<div class="entry-sub">${text(item.provider)}${item.certificateId ? ` · ${text(item.certificateId)}` : ""}</div>` : ""}
+              ${hasText(item.name) ? `<div class="entry-title" dir="auto">${bidi(item.name)}</div>` : ""}
+              ${hasText(item.provider, item.certificateId) ? `<div class="entry-sub" dir="auto">${bidi(item.provider)}${hasText(item.certificateId) ? ` · ${bidi(item.certificateId)}` : ""}</div>` : ""}
             </div>
-            ${item.date ? `<div class="entry-date">${text(item.date)}</div>` : ""}
+            ${hasText(item.date) ? `<div class="entry-date" dir="auto">${bidi(item.date)}</div>` : ""}
           </div>
         </div>`).join(""))
     : "";
 
-  const corporate = template === "corporate";
   const header = `
     <header class="header">
-      <div class="name">${text(p.fullName)}</div>
-      ${p.jobTitle ? `<div class="job-title">${text(p.jobTitle)}</div>` : ""}
+      ${hasText(p.fullName) ? `<div class="name" dir="auto">${bidi(p.fullName)}</div>` : ""}
+      ${hasText(p.jobTitle) ? `<div class="job-title" dir="auto">${bidi(p.jobTitle)}</div>` : ""}
       ${contacts ? `<div class="contact">${contacts}</div>` : ""}
     </header>`;
-  const body = [summary, educationHTML, experienceHTML, skillsHTML, languagesHTML, coursesHTML]
+  const body = [summary, experienceHTML, educationHTML, skillsHTML, languagesHTML, coursesHTML]
     .filter(Boolean)
     .join("");
 
   const templateStyles: Record<TemplateId, string> = {
     ats: `
-      .page { padding: 16mm 16mm 6mm; }
+      .page { padding: 11mm 13mm 9mm; }
       .header { text-align: center; border-bottom: 2px solid #111; padding-bottom: 12px; }
       .name { font-size: 23pt; font-weight: 800; }
       .job-title { margin-top: 3px; font-size: 11pt; font-weight: 600; }
@@ -96,7 +126,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       .section-title::after { content: ""; flex: 1; height: 1px; background: #aaa; }
     `,
     modern: `
-      .page { padding: 16mm 16mm 6mm; }
+      .page { padding: 11mm 13mm 9mm; }
       .header { border-bottom: 2px solid #111; padding-bottom: 10px; }
       .name { font-size: 25pt; font-weight: 800; }
       .job-title { margin-top: 3px; font-size: 11pt; }
@@ -104,8 +134,8 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       .tag { background: #111; color: #fff; }
     `,
     corporate: `
-      .page { padding: 0 0 6mm; }
-      .header { background: #111; color: #fff; padding: 16mm; }
+      .page { padding: 0 0 9mm; }
+      .header { background: #111; color: #fff; padding: 12mm 13mm; }
       .name { font-size: 25pt; font-weight: 800; }
       .job-title { margin-top: 3px; color: #ddd; font-size: 11pt; }
       .contact { color: #eee; margin-top: 8px; }
@@ -113,7 +143,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       .section-title { border-bottom: 2px solid #111; padding-bottom: 4px; }
     `,
     minimal: `
-      .page { padding: 19mm 18mm 6mm; }
+      .page { padding: 14mm 15mm 9mm; }
       .header { padding-bottom: 9px; border-bottom: 1px dashed #aaa; }
       .name { font-size: 26pt; font-weight: 800; }
       .job-title { margin-top: 3px; color: #555; font-size: 11pt; }
@@ -129,27 +159,27 @@ function buildHTML(cvData: CVData, template: TemplateId) {
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>السيرة الذاتية - ${text(p.fullName)}</title>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
-        @page { margin: 0; }
+        @page { size: A4; margin: 0; }
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; }
-        body { color: #111; background: #fff; font: 10.5pt/1.55 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .page { width: 210mm; margin: 0 auto; display: flex; flex-direction: column; }
+        body { color: #111; background: #fff; font: 10pt/1.5 Arial, Tahoma, 'Segoe UI', system-ui, sans-serif; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .page { width: 210mm; min-height: 297mm; margin: 0 auto; display: flex; flex-direction: column; }
         .header { flex: 0 0 auto; }
         .name { line-height: 1.35; }
         .contact { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; font-size: 9pt; color: #444; }
-        .content { display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; padding-top: 5mm; }
+        .content { display: flex; flex-direction: column; justify-content: flex-start; gap: 11px; padding-top: 4mm; }
         .section { break-inside: avoid; page-break-inside: avoid; }
-        .section-title { margin: 0 0 6px; font-size: 10.5pt; font-weight: 700; }
-        .entry { margin-bottom: 7px; break-inside: avoid; page-break-inside: avoid; }
+        .section-title { margin: 0 0 5px; font-size: 10pt; font-weight: 700; }
+        .entry { margin-bottom: 6px; break-inside: avoid; page-break-inside: avoid; }
         .entry:last-child { margin-bottom: 0; }
-        .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         .entry-title { font-weight: 700; color: #111; }
-        .entry-sub { font-size: 9.5pt; color: #444; }
-        .entry-date { flex: 0 0 auto; white-space: nowrap; font-size: 9pt; color: #555; }
-        .entry-desc, .summary { margin: 4px 0 0; font-size: 9.8pt; line-height: 1.65; white-space: pre-line; }
-        .tags { display: flex; flex-wrap: wrap; gap: 5px; }
-        .tag { display: inline-block; padding: 2px 9px; border: 1px solid #bbb; font-size: 9pt; border-radius: 3px; }
+        .entry-sub { font-size: 9pt; color: #444; }
+        .entry-date { flex: 0 0 auto; white-space: nowrap; font-size: 8.5pt; color: #555; }
+        .entry-desc, .summary { margin: 3px 0 0; font-size: 9.5pt; line-height: 1.55; white-space: pre-line; }
+        .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+        .tag { display: inline-block; padding: 2px 8px; border: 1px solid #bbb; font-size: 8.8pt; border-radius: 3px; }
+        bdi { unicode-bidi: isolate; }
         .contact-separator { color: #999; }
         ${templateStyles[template]}
         @media screen {
@@ -167,7 +197,7 @@ function buildHTML(cvData: CVData, template: TemplateId) {
 }
 
 export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
-  const html = buildHTML(cvData, templateId);
+  const html = buildCVHtml(cvData, templateId);
   if (!html) {
     alert("الرجاء إدخال بياناتك أولاً قبل الحفظ.");
     return;
@@ -190,17 +220,7 @@ export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
     isPreparing = true;
     void printWindow.document.fonts.ready.then(() => {
       window.requestAnimationFrame(() => {
-        const page = printWindow.document.querySelector<HTMLElement>(".page");
-        if (!page || printWindow.closed) return;
-
-        // Keep the A4 width, but set the printed page height to the content
-        // height so a short CV does not leave a large blank tail.
-        const heightMm = Math.ceil((page.scrollHeight * 25.4) / 96);
-        const pageSizeStyle = printWindow.document.createElement("style");
-        pageSizeStyle.textContent = `@page { size: 210mm ${heightMm}mm; margin: 0; }`;
-        printWindow.document.head.appendChild(pageSizeStyle);
-        page.style.height = `${heightMm}mm`;
-
+        if (printWindow.closed) return;
         window.setTimeout(() => {
           if (printWindow.closed || hasPrinted) return;
           hasPrinted = true;
@@ -213,5 +233,5 @@ export function exportToPDF(cvData: CVData, templateId: TemplateId = "ats") {
   printWindow.onload = () => {
     print();
   };
-  window.setTimeout(print, 3000);
+  window.setTimeout(print, 1800);
 }

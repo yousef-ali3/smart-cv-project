@@ -25,15 +25,23 @@ import {
 // خيارات المساعد (Wizard)
 const SPECIALTIES = [
   "تقنية المعلومات",
-  "إدارة الأعمال",
   "محاسبة",
   "هندسة",
+  "إدارة الأعمال",
+  "إدارة المشاريع",
+  "التسويق والمبيعات",
+  "الموارد البشرية",
+  "التعليم",
+  "الرعاية الصحية",
 ];
 
 const GOALS = [
   "الحصول على وظيفة",
   "تطوير المهارات",
   "اكتساب خبرة",
+  "تولي مسؤوليات أكبر",
+  "تحسين كفاءة العمل",
+  "قيادة فريق",
 ];
 
 const SKILLS = [
@@ -41,22 +49,14 @@ const SKILLS = [
   "حل المشكلات",
   "التواصل",
   "البرمجة",
+  "إدارة الوقت",
+  "التخطيط والتنظيم",
+  "تحليل البيانات",
+  "خدمة العملاء",
 ];
 
 const LEVELS = ["مبتدئ", "متوسط", "متقدم"] as const;
 type Level = (typeof LEVELS)[number];
-
-// إضافة حرف "ل" أمام كلمة مع التعامل الصحيح مع "ال" التعريف
-// أمثلة: "الحصول" → "للحصول"  |  "اكتساب" → "لاكتساب"  |  "تطوير" → "لتطوير"
-function lamPrefix(text: string): string {
-  const trimmed = text.trim();
-  if (!trimmed) return "";
-  // إذا بدأت الكلمة بـ "ال" التعريف، نستبدل الألف بحرف اللام
-  if (trimmed.startsWith("ال")) {
-    return "ل" + trimmed.slice(1);
-  }
-  return "ل" + trimmed;
-}
 
 // منطق إنشاء النص من خيارات المساعد
 function buildSummary(opts: {
@@ -67,37 +67,25 @@ function buildSummary(opts: {
 }): string {
   const { specialty, goal, skills, level } = opts;
 
-  // إذا لم يُدخل المستخدم أي شيء
   if (!specialty && !goal && !skills.length && !level) {
-    return "أسعى لتطوير مسيرتي المهنية واكتساب خبرات جديدة.";
+    return "مهني طموح أسعى إلى تطوير خبراتي والمساهمة بفاعلية في تحقيق أهداف جهة العمل.";
   }
 
-  const parts: string[] = [];
+  const parts = [specialty ? `متخصص في مجال ${specialty.trim()}` : "مهني طموح"];
+  if (goal) parts.push(`وأسعى إلى ${goal.trim()}`);
 
-  // التخصص + الهدف (مع معالجة حرف اللام بشكل صحيح)
-  if (specialty && goal) {
-    parts.push(`أسعى للعمل في مجال ${specialty.trim()} ${lamPrefix(goal)}`);
-  } else if (specialty) {
-    parts.push(`أسعى للعمل في مجال ${specialty.trim()}`);
-  } else if (goal) {
-    parts.push(`أسعى ${lamPrefix(goal)}`);
-  }
-
-  // المهارات
   if (skills.length) {
     const skillsText =
       skills.length === 1
         ? skills[0]
         : skills.slice(0, -1).join("، ") + " و" + skills[skills.length - 1];
-    parts.push(`وأمتلك مهارات مثل ${skillsText}`);
+    parts.push(`وأمتلك مهارات في ${skillsText}`);
   }
 
-  // مستوى الخبرة
-  if (level === "مبتدئ") parts.push("وأطمح إلى اكتساب خبرة عملية");
-  else if (level === "متوسط") parts.push("وأعمل على تطوير مهاراتي المهنية");
-  else if (level === "متقدم") parts.push("وأهدف إلى تقديم قيمة مضافة للشركة");
+  if (level === "مبتدئ") parts.push("وأحرص على بناء خبرتي وتطوير معرفتي باستمرار");
+  else if (level === "متوسط") parts.push("وأوظف خبرتي المتنامية لتحسين جودة العمل");
+  else if (level === "متقدم") parts.push("وأركز على تحقيق نتائج قابلة للقياس وتقديم قيمة مضافة");
 
-  // ربط الجمل وإضافة نقطة في النهاية
   return parts.join(" ").trim() + ".";
 }
 
@@ -248,6 +236,7 @@ export default function ProfessionalSummary({
       {/* وضع الكتابة اليدوية */}
       {mode === "manual" && (
         <Textarea
+          dir="auto"
           placeholder="اكتب ملخصاً مختصراً عن خبراتك ومهاراتك وأهدافك المهنية..."
           className="min-h-[120px] resize-none"
           value={value}
@@ -284,6 +273,7 @@ export default function ProfessionalSummary({
                 اكتب تخصصك المهني أو اختر من الاقتراحات (اختياري)
               </p>
               <Input
+                dir="auto"
                 value={specialty}
                 onChange={(e) => setSpecialty(e.target.value)}
                 placeholder="مثال: تصميم جرافيك، تسويق رقمي، طب الأسنان..."
@@ -316,6 +306,7 @@ export default function ProfessionalSummary({
                 اكتب هدفك الوظيفي أو اختر من الاقتراحات (اختياري)
               </p>
               <Input
+                dir="auto"
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
                 placeholder="مثال: قيادة فريق تطوير، إدارة مشاريع كبرى..."
@@ -368,6 +359,7 @@ export default function ProfessionalSummary({
               {/* إدخال مهارة مخصصة */}
               <div className="flex gap-2">
                 <Input
+                  dir="auto"
                   value={customSkill}
                   onChange={(e) => setCustomSkill(e.target.value)}
                   onKeyDown={handleSkillKeyDown}
@@ -470,6 +462,7 @@ export default function ProfessionalSummary({
               النص المولّد:
             </p>
             <div
+              dir="auto"
               className="p-3 bg-muted rounded-md text-sm leading-relaxed min-h-[60px]"
               data-testid="text-generated-summary"
             >

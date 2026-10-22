@@ -94,6 +94,7 @@ export default function PersonalInfoStep() {
                 <FormControl>
                   <Input
                     placeholder=""
+                    dir="auto"
                     {...field}
                     data-testid="input-full-name"
                   />
@@ -115,6 +116,7 @@ export default function PersonalInfoStep() {
                 <FormControl>
                   <Input
                     placeholder="مثال: مهندس برمجيات | محاسب قانوني"
+                    dir="auto"
                     {...field}
                     data-testid="input-job-title"
                   />
@@ -136,6 +138,7 @@ export default function PersonalInfoStep() {
                 <FormControl>
                   <Input
                     type="email"
+                    dir="ltr"
                     placeholder="example@email.com"
                     {...field}
                     data-testid="input-email"
@@ -157,6 +160,7 @@ export default function PersonalInfoStep() {
                 </FormLabel>
                 <FormControl>
                   <Input
+                    dir="ltr"
                     placeholder="+966 5x xxx xxxx"
                     {...field}
                     data-testid="input-phone"
@@ -178,6 +182,7 @@ export default function PersonalInfoStep() {
                 </FormLabel>
                 <FormControl>
                   <Input
+                    dir="auto"
                     placeholder="مثال: الرياض، المملكة العربية السعودية"
                     {...field}
                     data-testid="input-location"
@@ -199,6 +204,7 @@ export default function PersonalInfoStep() {
                 </FormLabel>
                 <FormControl>
                   <Input
+                    dir="ltr"
                     placeholder="linkedin.com/in/username"
                     {...field}
                     data-testid="input-linkedin"
@@ -220,6 +226,7 @@ export default function PersonalInfoStep() {
                 </FormLabel>
                 <FormControl>
                   <Input
+                    dir="ltr"
                     placeholder="www.myportfolio.com"
                     {...field}
                     data-testid="input-website"
